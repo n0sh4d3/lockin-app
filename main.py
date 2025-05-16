@@ -1,5 +1,4 @@
 # todo
-# save stats in json file
 # fix presets setting minutes not hours
 # make toggable options
 from customtkinter import (
@@ -235,10 +234,10 @@ class FocusLockApp:
         preset_buttons_frame = CTkFrame(master=presets_frame, fg_color="transparent")
         preset_buttons_frame.pack()
 
-        self.create_preset_button(preset_buttons_frame, "25 min", 25, 0)
-        self.create_preset_button(preset_buttons_frame, "45 min", 45, 0)
-        self.create_preset_button(preset_buttons_frame, "1 hour", 1, 0, is_hour=True)
-        self.create_preset_button(preset_buttons_frame, "2 hours", 2, 0, is_hour=True)
+        self.create_preset_button(preset_buttons_frame, "25 min", 25, 00)
+        self.create_preset_button(preset_buttons_frame, "45 min", 45, 00)
+        self.create_preset_button(preset_buttons_frame, "1 hour", 00, 1)
+        self.create_preset_button(preset_buttons_frame, "2 hours", 00, 2)
 
         time_frame = CTkFrame(master=center_frame, fg_color="transparent")
         time_frame.pack(pady=10)
@@ -338,7 +337,7 @@ class FocusLockApp:
         )
         motivation.pack(side="bottom", pady=15)
 
-    def create_preset_button(self, master, text, mins=0, hours=0, is_hour=False):
+    def create_preset_button(self, master, text, mins=0, hours=0):
         """Create a preset time button"""
         btn = CTkButton(
             master=master,
@@ -350,7 +349,7 @@ class FocusLockApp:
             corner_radius=8,
             width=70,
             height=35,
-            command=lambda: self.set_preset_time(hours if is_hour else 0, mins),
+            command=lambda: self.set_preset_time(hours, mins),
         )
         btn.pack(side="left", padx=5)
 

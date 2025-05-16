@@ -21,6 +21,7 @@ import threading
 import os
 import random
 from datetime import datetime
+from read_json_db import Database
 
 
 class Colors:
@@ -53,13 +54,16 @@ class Colors:
 
 class FocusLockApp:
     def __init__(self) -> None:
+        self.DB = Database()
         self.is_finished = False
         self.countdown_running = False
         self.countdown_thread = None
-        self.total_focus_time = 0
-        self.current_session_seconds = 0
         self.clrs = Colors()
-        self.session_history = []
+
+        self.total_focus_time = sum(int(time) for time in self.DB.focus_times)
+        self.current_session_seconds = 0
+
+        self.session_history = [int(time) for time in self.DB.focus_times]
 
         set_appearance_mode("dark")
 
@@ -82,6 +86,7 @@ class FocusLockApp:
         self.create_main_container()
 
         self.show_setup_view()
+        self.update_total_focus_time()
 
         self.app.mainloop()
 
@@ -497,7 +502,7 @@ class FocusLockApp:
 
         header_subtitle = CTkLabel(
             master=self.header_container,
-            text="Great job staying focused",
+            text=self.get_random_success(),
             font=self.subheader_font,
             text_color=self.clrs.NEUTRAL_400,
         )
@@ -664,7 +669,7 @@ class FocusLockApp:
             self.clrs.PRIMARY,
         )
 
-        avg_time = self.total_focus_time // max(len(self.session_history), 1)
+        avg_time = self.total_focus_time // max(len(self.DB.focus_times), 1)
         self.create_stat_card(
             stats_cards,
             "AVERAGE",
@@ -675,7 +680,7 @@ class FocusLockApp:
         self.create_stat_card(
             stats_cards,
             "COMPLETED",
-            str(len(self.session_history)),
+            str(len(self.DB.focus_times)),
             self.clrs.WARNING,
         )
 
@@ -690,7 +695,7 @@ class FocusLockApp:
         )
         sessions_title.pack(anchor="w", pady=(0, 15))
 
-        if not self.session_history:
+        if not self.DB.focus_times:
             no_data = CTkLabel(
                 master=sessions_frame,
                 text="No sessions recorded yet. Complete a focus session to see data here.",
@@ -699,8 +704,12 @@ class FocusLockApp:
             )
             no_data.pack(pady=20)
         else:
-            for i, session_time in enumerate(reversed(self.session_history[-5:])):
-                self.create_session_item(sessions_frame, i + 1, session_time)
+            for i, (session_date, session_time) in enumerate(
+                list(zip(self.DB.dates, self.DB.focus_times)),
+            ):
+                self.create_session_item(
+                    sessions_frame, i + 1, int(session_time), session_date
+                )
 
     def create_stat_card(self, master, title, value, color):
         """Create a statistics card"""
@@ -727,7 +736,7 @@ class FocusLockApp:
         )
         card_value.pack(anchor="w", padx=15, pady=(0, 15))
 
-    def create_session_item(self, master, number, session_time):
+    def create_session_item(self, master, number, session_time, session_date=""):
         """Create a session history item"""
         item = CTkFrame(
             master=master,
@@ -738,9 +747,13 @@ class FocusLockApp:
         item.pack(fill="x", pady=5)
         item.pack_propagate(False)
 
+        display_date = (
+            session_date if session_date else datetime.now().strftime("%Y-%m-%d %H:%M")
+        )
+
         session_num = CTkLabel(
             master=item,
-            text=f"Session #{number} {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+            text=f"Session #{number} {display_date}",
             font=self.label_font,
             text_color=self.clrs.FG_COLOR,
         )
@@ -1052,13 +1065,18 @@ class FocusLockApp:
         """Record the completed session"""
 
         completed_time = self.total_countdown_seconds
+        current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         self.session_history.append(completed_time)
+        self.DB.save_to_json(date=current_date, focus_time=str(completed_time))
 
         self.total_focus_time += completed_time
 
     def update_total_focus_time(self):
         """Update the total focus time display"""
+        # Recalculate total focus time from DB to ensure it's up to date
+        self.total_focus_time = sum(int(time) for time in self.DB.focus_times)
+
         hours, remainder = divmod(self.total_focus_time, 3600)
         minutes, _ = divmod(remainder, 60)
 

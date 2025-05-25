@@ -11,7 +11,8 @@ from customtkinter import (
     CTkScrollableFrame,
     StringVar,
 )
-from PIL import Image, ImageTk
+
+# forgot why i even have pillow installed lol
 import time
 import threading
 import random

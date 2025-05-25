@@ -1,16 +1,16 @@
 {
   "focus_sessions": [
     {
-      "date": "2025-05-16 08:16:38",
-      "focus_time": "60"
-    },
-    {
-      "date": "2025-05-16 08:17:42",
-      "focus_time": "60"
-    },
-    {
-      "date": "2025-05-16 08:31:31",
+      "date": "2025-05-25 11:46:28",
       "focus_time": "120"
+    },
+    {
+      "date": "2025-05-25 11:56:37",
+      "focus_time": "60"
     }
+  ],
+  "session_names": [
+    "brudas",
+    "dziwkaz"
   ]
 }

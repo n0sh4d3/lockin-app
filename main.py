@@ -1,6 +1,5 @@
 # todo
-# fix presets setting minutes not hours
-# make toggable options
+# disable other options when focus is running
 from customtkinter import (
     CTk,
     CTkButton,
@@ -17,7 +16,6 @@ from customtkinter import (
 from PIL import Image, ImageTk
 import time
 import threading
-import os
 import random
 from datetime import datetime
 from read_json_db import Database
@@ -120,9 +118,15 @@ class FocusLockApp:
         )
         app_tagline.pack(anchor="w", pady=(0, 10))
 
-        self.create_nav_button("Fokus Timer", self.show_setup_view, True)
-        self.create_nav_button("Statistics", self.show_statistics_view)
-        self.create_nav_button("Settings", self.show_settings_view)
+        self.focus_nav_btn = self.create_nav_button(
+            "Fokus Timer", self.show_setup_view, True
+        )
+        self.stats_nav_btn = self.create_nav_button(
+            "Statistics", self.show_statistics_view
+        )
+        self.settings_nav_btn = self.create_nav_button(
+            "Settings", lambda: self.show_settings_view(True)
+        )
 
         footer_frame = CTkFrame(master=self.sidebar, fg_color="transparent")
         footer_frame.pack(side="bottom", fill="x", padx=20, pady=30)
@@ -162,6 +166,7 @@ class FocusLockApp:
             command=command,
         )
         btn.pack(fill="x", padx=10)
+        return btn
 
     def create_main_container(self):
         """Create the main container for content"""
@@ -359,10 +364,10 @@ class FocusLockApp:
         self.minutes_entry.delete(0, "end")
 
         if hours > 0:
-            self.hours_entry.insert(0, str(hours))
+            self.hours_entry.insert("00", str(hours))
 
         if minutes > 0:
-            self.minutes_entry.insert(0, str(minutes))
+            self.minutes_entry.insert("00", str(minutes))
 
     def show_countdown_view(self):
         """Display the countdown view"""
@@ -736,7 +741,7 @@ class FocusLockApp:
         card_value.pack(anchor="w", padx=15, pady=(0, 15))
 
     def create_session_item(self, master, number, session_time, session_date=""):
-        """Create a session history item"""
+        """Create a session history item with rename and delete options"""
         item = CTkFrame(
             master=master,
             fg_color=self.clrs.NEUTRAL_700,
@@ -750,23 +755,85 @@ class FocusLockApp:
             session_date if session_date else datetime.now().strftime("%Y-%m-%d %H:%M")
         )
 
-        session_num = CTkLabel(
+        # Get session name (custom or default)
+        session_name = f"Session #{number}"
+        if hasattr(self.DB, "session_names") and (number - 1) < len(
+            self.DB.session_names
+        ):
+            session_name = self.DB.session_names[number - 1]
+
+        # Left side - Session info (takes up remaining space)
+        session_info = CTkLabel(
             master=item,
-            text=f"Session #{number} {display_date}",
+            text=f"{session_name} • {display_date}",
             font=self.label_font,
             text_color=self.clrs.FG_COLOR,
+            anchor="w",
         )
-        session_num.pack(side="left", padx=15)
+        session_info.pack(side="left", padx=15, fill="x", expand=True)
 
+        # Right side - Fixed width container for buttons and duration
+        right_container = CTkFrame(master=item, fg_color="transparent", width=300)
+        right_container.pack(side="right", padx=15)
+        right_container.pack_propagate(False)
+
+        # Duration label - fixed position on the right
         session_duration = CTkLabel(
-            master=item,
+            master=right_container,
             text=self.format_time(session_time),
             font=CTkFont(family="Helvetica", size=16, weight="bold"),
             text_color=self.clrs.PRIMARY,
         )
-        session_duration.pack(side="right", padx=15)
+        session_duration.pack(side="right", padx=(15, 0))
 
-    def show_settings_view(self):
+        buttons_container = CTkFrame(
+            master=right_container,
+            fg_color="transparent",
+            width=100,
+        )
+        buttons_container.pack(side="right", padx=(0, 15))
+        buttons_container.pack_propagate(False)
+
+        delete_btn = CTkButton(
+            master=buttons_container,
+            text="x",
+            font=CTkFont(size=16),
+            fg_color=self.clrs.DANGER,
+            text_color=self.clrs.FG_COLOR,
+            hover_color="#E11D48",
+            width=36,
+            height=36,
+            corner_radius=18,
+            command=lambda: self.show_delete_confirmation(number - 1),
+        )
+        delete_btn.pack(side="right", padx=2)
+
+        rename_btn = CTkButton(
+            master=buttons_container,
+            text="+",
+            font=CTkFont(size=16),
+            fg_color=self.clrs.SUCCESS,
+            text_color=self.clrs.FG_COLOR,
+            hover_color=self.clrs.SUCCESS_DARK,
+            width=36,
+            height=36,
+            corner_radius=18,
+            command=lambda: self.show_rename_dialog(number - 1),
+        )
+        rename_btn.pack(side="right", padx=2)
+
+    def set_navigation_state(self, enabled=True):
+        """Enable or disable navigation buttons"""
+        state = "normal" if enabled else "disabled"
+
+        if hasattr(self, "focus_nav_btn"):
+            self.focus_nav_btn.configure(state=state)
+        if hasattr(self, "stats_nav_btn"):
+            self.stats_nav_btn.configure(state=state)
+        if hasattr(self, "settings_nav_btn"):
+            self.settings_nav_btn.configure(state=state)
+
+    def show_settings_view(self, enable: bool):
         """Display the settings view"""
 
         self.update_navigation("Settings")
@@ -1001,6 +1068,7 @@ class FocusLockApp:
         self.current_session_seconds = total_seconds
 
         self.show_countdown_view()
+        self.set_navigation_state(False)
 
         self.total_countdown_seconds = total_seconds
 
@@ -1085,6 +1153,7 @@ class FocusLockApp:
         """Called when countdown completes"""
         self.countdown_running = False
         self.is_paused = False
+        self.set_navigation_state(True)
 
         self.show_completion_view()
 
@@ -1098,6 +1167,7 @@ class FocusLockApp:
                 self.countdown_thread.join(0.5)
 
             self.show_setup_view()
+            self.set_navigation_state(True)
 
     def update_navigation(self, active_nav):
         """Update navigation buttons to reflect active section"""
@@ -1129,6 +1199,201 @@ class FocusLockApp:
             return f"{minutes}m {seconds}s"
         else:
             return f"{seconds}s"
+
+    def show_rename_dialog(self, session_index):
+        """Show dialog to rename a session"""
+        from customtkinter import CTkToplevel
+
+        dialog = CTkToplevel(self.app)
+        dialog.title("Rename Session")
+        dialog.geometry("400x200")
+        dialog.configure(fg_color=self.clrs.NEUTRAL_900)
+        dialog.resizable(False, False)
+
+        # Center the dialog on the parent window
+        dialog.transient(self.app)
+        dialog.grab_set()
+        dialog.after(10, lambda: dialog.focus())
+
+        title_label = CTkLabel(
+            master=dialog,
+            text="Enter new session name:",
+            font=self.subheader_font,
+            text_color=self.clrs.FG_COLOR,
+        )
+        title_label.pack(pady=20)
+
+        current_name = f"Session #{session_index + 1}"
+        if hasattr(self.DB, "session_names") and session_index < len(
+            self.DB.session_names
+        ):
+            current_name = self.DB.session_names[session_index]
+
+        name_entry = CTkEntry(
+            master=dialog,
+            width=300,
+            height=40,
+            font=self.label_font,
+            fg_color=self.clrs.NEUTRAL_700,
+            border_color=self.clrs.NEUTRAL_600,
+            text_color=self.clrs.FG_COLOR,
+        )
+        name_entry.pack(pady=10)
+        name_entry.insert(0, current_name)
+
+        # Focus and select all text after a brief delay
+        dialog.after(100, lambda: name_entry.focus())
+        dialog.after(110, lambda: name_entry.select_range(0, "end"))
+
+        def save_rename():
+            new_name = name_entry.get().strip()
+            if new_name:
+                # Initialize session_names if it doesn't exist
+                if not hasattr(self.DB, "session_names"):
+                    self.DB.session_names = [
+                        f"Session #{i + 1}" for i in range(len(self.DB.focus_times))
+                    ]
+
+                # Extend list if needed
+                while len(self.DB.session_names) <= session_index:
+                    self.DB.session_names.append(
+                        f"Session #{len(self.DB.session_names) + 1}"
+                    )
+
+                self.DB.session_names[session_index] = new_name
+                try:
+                    self.DB.save_session_names()
+                except AttributeError:
+                    pass
+
+                self.show_statistics_view()  # Refresh the view
+            dialog.destroy()
+
+        def cancel_rename():
+            dialog.destroy()
+
+        buttons_frame = CTkFrame(master=dialog, fg_color="transparent")
+        buttons_frame.pack(pady=20)
+
+        cancel_btn = CTkButton(
+            master=buttons_frame,
+            text="Cancel",
+            font=self.button_font,
+            fg_color=self.clrs.NEUTRAL_700,
+            text_color=self.clrs.NEUTRAL_300,
+            hover_color=self.clrs.NEUTRAL_600,
+            width=100,
+            height=40,
+            corner_radius=8,
+            command=cancel_rename,
+        )
+        cancel_btn.pack(side="left", padx=(0, 10))
+
+        save_btn = CTkButton(
+            master=buttons_frame,
+            text="Save",
+            font=self.button_font,
+            fg_color=self.clrs.SUCCESS,
+            text_color=self.clrs.FG_COLOR,
+            hover_color=self.clrs.SUCCESS_DARK,
+            width=100,
+            height=40,
+            corner_radius=8,
+            command=save_rename,
+        )
+        save_btn.pack(side="left")
+
+        # Bind Enter key to save and Escape to cancel
+        name_entry.bind("<Return>", lambda e: save_rename())
+        dialog.bind("<Escape>", lambda e: cancel_rename())
+
+    def show_delete_confirmation(self, session_index):
+        """Show confirmation dialog for deleting a session"""
+        from customtkinter import CTkToplevel
+
+        dialog = CTkToplevel(self.app)
+        dialog.title("Delete Session")
+        dialog.geometry("400x200")
+        dialog.configure(fg_color=self.clrs.NEUTRAL_900)
+        dialog.resizable(False, False)
+
+        # Center the dialog on the parent window
+        dialog.transient(self.app)
+        dialog.grab_set()
+        dialog.after(10, lambda: dialog.focus())
+
+        warning_label = CTkLabel(
+            master=dialog,
+            text="Are you sure you want to delete this session?",
+            font=self.subheader_font,
+            text_color=self.clrs.FG_COLOR,
+        )
+        warning_label.pack(pady=20)
+
+        subtitle_label = CTkLabel(
+            master=dialog,
+            text="This action cannot be undone.",
+            font=self.label_font,
+            text_color=self.clrs.NEUTRAL_400,
+        )
+        subtitle_label.pack(pady=(0, 20))
+
+        def confirm_delete():
+            if session_index < len(self.DB.focus_times):
+                del self.DB.focus_times[session_index]
+            if session_index < len(self.DB.dates):
+                del self.DB.dates[session_index]
+            if hasattr(self.DB, "session_names") and session_index < len(
+                self.DB.session_names
+            ):
+                del self.DB.session_names[session_index]
+
+            try:
+                self.DB.save_all_data()
+            except AttributeError:
+                pass
+
+            self.total_focus_time = sum(int(time) for time in self.DB.focus_times)
+            self.update_total_focus_time()
+            self.show_statistics_view()
+            dialog.destroy()
+
+        def cancel_delete():
+            dialog.destroy()
+
+        buttons_frame = CTkFrame(master=dialog, fg_color="transparent")
+        buttons_frame.pack(pady=20)
+
+        cancel_btn = CTkButton(
+            master=buttons_frame,
+            text="Cancel",
+            font=self.button_font,
+            fg_color=self.clrs.NEUTRAL_700,
+            text_color=self.clrs.NEUTRAL_300,
+            hover_color=self.clrs.NEUTRAL_600,
+            width=100,
+            height=40,
+            corner_radius=8,
+            command=cancel_delete,
+        )
+        cancel_btn.pack(side="left", padx=(0, 10))
+
+        delete_btn = CTkButton(
+            master=buttons_frame,
+            text="Delete",
+            font=self.button_font,
+            fg_color=self.clrs.DANGER,
+            text_color=self.clrs.FG_COLOR,
+            hover_color="#E11D48",
+            width=100,
+            height=40,
+            corner_radius=8,
+            command=confirm_delete,
+        )
+        delete_btn.pack(side="left")
+
+        # Bind Escape key to cancel
+        dialog.bind("<Escape>", lambda e: cancel_delete())
 
     def get_random_quote(self):
         """Return a ruthless motivational quote that hits like a slap to the face"""

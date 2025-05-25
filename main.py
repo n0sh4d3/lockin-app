@@ -1,3 +1,6 @@
+# todo
+# block sites when locking in hard
+# gamifying this shit would be fire
 from customtkinter import (
     CTk,
     CTkButton,

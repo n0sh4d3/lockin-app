@@ -1,4 +1,11 @@
 {
-  "focus_sessions": [],
-  "session_names": []
+  "focus_sessions": [
+    {
+      "date": "2025-05-25 20:24:15",
+      "focus_time": "1500"
+    }
+  ],
+  "session_names": [
+    "Session #1"
+  ]
 }

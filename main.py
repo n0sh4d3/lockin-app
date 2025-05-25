@@ -1,5 +1,3 @@
-# todo
-# disable other options when focus is running
 from customtkinter import (
     CTk,
     CTkButton,
@@ -19,50 +17,29 @@ import threading
 import random
 from datetime import datetime
 from read_json_db import Database
-
-
-class Colors:
-    PRIMARY = "#4C566A"
-    PRIMARY_DARK = "#3B4252"
-    PRIMARY_LIGHT = "#7B8794"
-
-    NEUTRAL_1000 = "#050709"
-    NEUTRAL_900 = "#0B0F19"
-    NEUTRAL_800 = "#161B22"
-    NEUTRAL_700 = "#1F2733"
-    NEUTRAL_600 = "#2D333B"
-    NEUTRAL_500 = "#4B5563"
-    NEUTRAL_400 = "#6B7280"
-    NEUTRAL_300 = "#9CA3AF"
-
-    WHITE = "#FFFFFF"
-    SNOW_WHITE = "#F8FAFC"
-    OFF_WHITE = "#E5E7EB"
-
-    SUCCESS = "#3AAFA9"
-    SUCCESS_DARK = "#2A7C76"
-
-    WARNING = "#D1A70F"
-    DANGER = "#BF4C5A"
-
-    FG_COLOR = "#F8FAFC"
-    BG_COLOR = "#0B0F19"
+from colors import *
+import quotes_db
 
 
 class FocusLockApp:
     def __init__(self) -> None:
         self.DB = Database()
+        self.settings_manager = SettingsManager()
         self.is_finished = False
         self.countdown_running = False
         self.countdown_thread = None
-        self.clrs = Colors()
+
+        self.current_theme = self.settings_manager.get("theme")
+        self.setup_theme()
 
         self.total_focus_time = sum(int(time) for time in self.DB.focus_times)
         self.current_session_seconds = 0
-
         self.session_history = [int(time) for time in self.DB.focus_times]
 
-        set_appearance_mode("dark")
+        if self.current_theme == "light":
+            set_appearance_mode("light")
+        else:
+            set_appearance_mode("dark")
 
     def start(self):
         self.app = CTk()
@@ -86,6 +63,111 @@ class FocusLockApp:
         self.update_total_focus_time()
 
         self.app.mainloop()
+
+    def setup_theme(self):
+        """Setup colors based on current theme"""
+        if self.current_theme == "light":
+            self.clrs = LightTheme()
+        else:
+            self.clrs = DarkTheme()
+
+    def change_theme(self, theme_name):
+        """Change the application theme"""
+        self.current_theme = theme_name
+        self.settings_manager.set("theme", theme_name)
+        self.setup_theme()
+
+        if theme_name == "light":
+            set_appearance_mode("light")
+        else:
+            set_appearance_mode("dark")
+
+        self.app.configure(fg_color=self.clrs.NEUTRAL_900)
+
+        self.update_sidebar_colors()
+
+        if hasattr(self, "main_container"):
+            self.main_container.configure(fg_color="transparent")
+
+        if hasattr(self, "current_view"):
+            current_view = self.current_view
+            if current_view == "setup":
+                self.show_setup_view()
+            elif current_view == "statistics":
+                self.show_statistics_view()
+            elif current_view == "settings":
+                self.show_settings_view(True)
+            elif current_view == "countdown":
+                self.update_countdown_colors()
+        else:
+            self.show_setup_view()
+
+    def update_countdown_colors(self):
+        """Update countdown view colors without disrupting the timer"""
+        if hasattr(self, "countdown_label"):
+            self.countdown_label.configure(text_color=self.clrs.FG_COLOR)
+
+        if hasattr(self, "progress_bar"):
+            self.progress_bar.configure(
+                fg_color=self.clrs.NEUTRAL_700, progress_color=self.clrs.PRIMARY
+            )
+
+        if hasattr(self, "header_container"):
+            for widget in self.header_container.winfo_children():
+                if isinstance(widget, CTkLabel):
+                    if "Fokus Session" in widget.cget("text"):
+                        widget.configure(text_color=self.clrs.FG_COLOR)
+                    else:
+                        widget.configure(text_color=self.clrs.NEUTRAL_400)
+
+        if hasattr(self, "content_container"):
+            for widget in self.content_container.winfo_children():
+                if isinstance(widget, CTkFrame):
+                    widget.configure(fg_color=self.clrs.NEUTRAL_800)
+
+    def update_sidebar_colors(self):
+        """Update sidebar colors after theme change"""
+        if hasattr(self, "sidebar"):
+            self.sidebar.configure(fg_color=self.clrs.NEUTRAL_800)
+
+            if hasattr(self, "total_focus_display"):
+                self.total_focus_display.configure(text_color=self.clrs.PRIMARY)
+
+            self.update_navigation_colors()
+
+    def update_navigation_colors(self):
+        """Update navigation button colors"""
+        nav_buttons = [
+            ("Fokus Timer", getattr(self, "focus_nav_btn", None)),
+            ("Statistics", getattr(self, "stats_nav_btn", None)),
+            ("Settings", getattr(self, "settings_nav_btn", None)),
+        ]
+
+        current_view_map = {
+            "setup": "Fokus Timer",
+            "countdown": "Fokus Timer",
+            "statistics": "Statistics",
+            "settings": "Settings",
+        }
+
+        active_nav = current_view_map.get(
+            getattr(self, "current_view", "setup"), "Fokus Timer"
+        )
+
+        for nav_text, btn in nav_buttons:
+            if btn:
+                if nav_text == active_nav:
+                    btn.configure(
+                        fg_color=self.clrs.PRIMARY,
+                        text_color=self.clrs.FG_COLOR,
+                        hover_color=self.clrs.PRIMARY_DARK,
+                    )
+                else:
+                    btn.configure(
+                        fg_color="transparent",
+                        text_color=self.clrs.NEUTRAL_300,
+                        hover_color=self.clrs.NEUTRAL_700,
+                    )
 
     def create_sidebar(self):
         """Create the sidebar with navigation"""
@@ -191,6 +273,7 @@ class FocusLockApp:
 
     def show_setup_view(self):
         """Display the timer setup view"""
+        self.current_view = "setup"
         self.update_navigation("Fokus Timer")
 
         for widget in self.header_container.winfo_children():
@@ -371,7 +454,7 @@ class FocusLockApp:
 
     def show_countdown_view(self):
         """Display the countdown view"""
-
+        self.current_view = "countdown"
         self.update_navigation("Fokus Timer")
 
         for widget in self.header_container.winfo_children():
@@ -621,6 +704,7 @@ class FocusLockApp:
     def show_statistics_view(self):
         """Display the statistics view"""
 
+        self.current_view = "statistics"
         self.update_navigation("Statistics")
 
         for widget in self.header_container.winfo_children():
@@ -755,14 +839,12 @@ class FocusLockApp:
             session_date if session_date else datetime.now().strftime("%Y-%m-%d %H:%M")
         )
 
-        # Get session name (custom or default)
         session_name = f"Session #{number}"
         if hasattr(self.DB, "session_names") and (number - 1) < len(
             self.DB.session_names
         ):
             session_name = self.DB.session_names[number - 1]
 
-        # Left side - Session info (takes up remaining space)
         session_info = CTkLabel(
             master=item,
             text=f"{session_name} • {display_date}",
@@ -772,12 +854,10 @@ class FocusLockApp:
         )
         session_info.pack(side="left", padx=15, fill="x", expand=True)
 
-        # Right side - Fixed width container for buttons and duration
         right_container = CTkFrame(master=item, fg_color="transparent", width=300)
         right_container.pack(side="right", padx=15)
         right_container.pack_propagate(False)
 
-        # Duration label - fixed position on the right
         session_duration = CTkLabel(
             master=right_container,
             text=self.format_time(session_time),
@@ -835,7 +915,7 @@ class FocusLockApp:
 
     def show_settings_view(self, enable: bool):
         """Display the settings view"""
-
+        self.current_view = "settings"
         self.update_navigation("Settings")
 
         for widget in self.header_container.winfo_children():
@@ -910,38 +990,7 @@ class FocusLockApp:
         sound_switch.pack(side="right")
 
         self.create_settings_section(appearance_tab, "Theme Settings")
-
-        theme_frame = CTkFrame(master=appearance_tab, fg_color="transparent")
-        theme_frame.pack(fill="x", pady=5)
-
-        theme_label = CTkLabel(
-            master=theme_frame,
-            text="Application Theme",
-            font=self.label_font,
-            text_color=self.clrs.FG_COLOR,
-        )
-        theme_label.pack(side="left")
-
-        theme_options = ["Dark", "Light", "System"]
-        theme_var = StringVar(value="Dark")
-
-        for option in theme_options:
-            theme_radio = CTkButton(
-                master=theme_frame,
-                text=option,
-                font=self.label_font,
-                fg_color=self.clrs.PRIMARY
-                if option == "Dark"
-                else self.clrs.NEUTRAL_700,
-                text_color=self.clrs.FG_COLOR,
-                hover_color=self.clrs.PRIMARY_DARK
-                if option == "Dark"
-                else self.clrs.NEUTRAL_600,
-                width=80,
-                height=30,
-                corner_radius=15,
-            )
-            theme_radio.pack(side="right", padx=5)
+        self.create_theme_section(appearance_tab)
 
         self.create_settings_section(notifications_tab, "Notification Settings")
 
@@ -1004,6 +1053,82 @@ class FocusLockApp:
         )
         version_label.pack(side="right")
 
+    def create_theme_section(self, appearance_tab):
+        """Create the theme selection section"""
+        theme_frame = CTkFrame(master=appearance_tab, fg_color="transparent")
+        theme_frame.pack(fill="x", pady=5)
+
+        theme_label = CTkLabel(
+            master=theme_frame,
+            text="Application Theme",
+            font=self.label_font,
+            text_color=self.clrs.FG_COLOR,
+        )
+        theme_label.pack(side="left")
+
+        theme_buttons_frame = CTkFrame(master=theme_frame, fg_color="transparent")
+        theme_buttons_frame.pack(side="right")
+
+        dark_btn = CTkButton(
+            master=theme_buttons_frame,
+            text="Dark",
+            font=self.label_font,
+            fg_color=self.clrs.PRIMARY
+            if self.current_theme == "dark"
+            else self.clrs.NEUTRAL_700,
+            text_color=self.clrs.FG_COLOR
+            if self.current_theme == "dark"
+            else self.clrs.NEUTRAL_300,
+            hover_color=self.clrs.PRIMARY_DARK
+            if self.current_theme == "dark"
+            else self.clrs.NEUTRAL_600,
+            width=80,
+            height=30,
+            corner_radius=15,
+            command=lambda: self.change_theme("dark"),
+        )
+        dark_btn.pack(side="right", padx=5)
+
+        light_btn = CTkButton(
+            master=theme_buttons_frame,
+            text="Light",
+            font=self.label_font,
+            fg_color=self.clrs.PRIMARY
+            if self.current_theme == "light"
+            else self.clrs.NEUTRAL_700,
+            text_color=self.clrs.FG_COLOR
+            if self.current_theme == "light"
+            else self.clrs.NEUTRAL_300,
+            hover_color=self.clrs.PRIMARY_DARK
+            if self.current_theme == "light"
+            else self.clrs.NEUTRAL_600,
+            width=80,
+            height=30,
+            corner_radius=15,
+            command=lambda: self.change_theme("light"),
+        )
+        light_btn.pack(side="right", padx=5)
+
+        system_btn = CTkButton(
+            master=theme_buttons_frame,
+            text="System",
+            font=self.label_font,
+            fg_color=self.clrs.PRIMARY
+            if self.current_theme == "system"
+            else self.clrs.NEUTRAL_700,
+            text_color=self.clrs.FG_COLOR
+            if self.current_theme == "system"
+            else self.clrs.NEUTRAL_300,
+            hover_color=self.clrs.PRIMARY_DARK
+            if self.current_theme == "system"
+            else self.clrs.NEUTRAL_600,
+            width=80,
+            height=30,
+            corner_radius=15,
+            command=lambda: self.change_theme("system"),
+        )
+        system_btn.pack(side="right", padx=5)
+
     def create_settings_section(self, master, title):
         """Create a settings section with header"""
         section_title = CTkLabel(
@@ -1029,7 +1154,9 @@ class FocusLockApp:
         minutes_str = self.minutes_entry.get()
 
         if hours_str == "" and minutes_str == "":
-            self.status_label.configure(text="Please enter a focus time")
+            self.status_label.configure(
+                text="You think typing nothing will lock you in? Dumbass, focus or quit."
+            )
             return None
 
         try:
@@ -1037,23 +1164,31 @@ class FocusLockApp:
             minutes = int(minutes_str) if minutes_str else 0
 
             if hours < 0 or minutes < 0:
-                self.status_label.configure(text="Time values must be positive")
+                self.status_label.configure(
+                    text="Negative time? Did your brain short-circuit or what?"
+                )
                 return None
 
             if minutes >= 60:
-                self.status_label.configure(text="Minutes must be less than 60")
+                self.status_label.configure(
+                    text="Bro, 60 minutes is an hour. Stop wasting time pretending to work."
+                )
                 return None
 
             total_seconds = hours * 3600 + minutes * 60
 
             if total_seconds == 0:
-                self.status_label.configure(text="Focus time cannot be zero")
+                self.status_label.configure(
+                    text="Zero minutes? Either quit whining or actually try."
+                )
                 return None
 
             return total_seconds
 
         except ValueError:
-            self.status_label.configure(text="Please enter valid numbers")
+            self.status_label.configure(
+                text="Typing letters? Congrats, you just lost focus before you started."
+            )
             return None
 
     def start_countdown(self):
@@ -1141,7 +1276,7 @@ class FocusLockApp:
 
     def update_total_focus_time(self):
         """Update the total focus time display"""
-        # Recalculate total focus time from DB to ensure it's up to date
+
         self.total_focus_time = sum(int(time) for time in self.DB.focus_times)
 
         hours, remainder = divmod(self.total_focus_time, 3600)
@@ -1210,7 +1345,6 @@ class FocusLockApp:
         dialog.configure(fg_color=self.clrs.NEUTRAL_900)
         dialog.resizable(False, False)
 
-        # Center the dialog on the parent window
         dialog.transient(self.app)
         dialog.grab_set()
         dialog.after(10, lambda: dialog.focus())
@@ -1241,20 +1375,17 @@ class FocusLockApp:
         name_entry.pack(pady=10)
         name_entry.insert(0, current_name)
 
-        # Focus and select all text after a brief delay
         dialog.after(100, lambda: name_entry.focus())
         dialog.after(110, lambda: name_entry.select_range(0, "end"))
 
         def save_rename():
             new_name = name_entry.get().strip()
             if new_name:
-                # Initialize session_names if it doesn't exist
                 if not hasattr(self.DB, "session_names"):
                     self.DB.session_names = [
                         f"Session #{i + 1}" for i in range(len(self.DB.focus_times))
                     ]
 
-                # Extend list if needed
                 while len(self.DB.session_names) <= session_index:
                     self.DB.session_names.append(
                         f"Session #{len(self.DB.session_names) + 1}"
@@ -1266,7 +1397,7 @@ class FocusLockApp:
                 except AttributeError:
                     pass
 
-                self.show_statistics_view()  # Refresh the view
+                self.show_statistics_view()
             dialog.destroy()
 
         def cancel_rename():
@@ -1303,7 +1434,6 @@ class FocusLockApp:
         )
         save_btn.pack(side="left")
 
-        # Bind Enter key to save and Escape to cancel
         name_entry.bind("<Return>", lambda e: save_rename())
         dialog.bind("<Escape>", lambda e: cancel_rename())
 
@@ -1317,7 +1447,6 @@ class FocusLockApp:
         dialog.configure(fg_color=self.clrs.NEUTRAL_900)
         dialog.resizable(False, False)
 
-        # Center the dialog on the parent window
         dialog.transient(self.app)
         dialog.grab_set()
         dialog.after(10, lambda: dialog.focus())
@@ -1392,106 +1521,27 @@ class FocusLockApp:
         )
         delete_btn.pack(side="left")
 
-        # Bind Escape key to cancel
         dialog.bind("<Escape>", lambda e: cancel_delete())
 
     def get_random_quote(self):
         """Return a ruthless motivational quote that hits like a slap to the face"""
-        quotes = [
-            "You don’t need a new plan. You need to stop being a little bitch about the current one.",
-            "You keep quitting when it gets hard. That’s why you never win.",
-            "Success isn’t avoiding pain. It’s eating it until it stops scaring you.",
-            "You’re not unlucky. You’re undisciplined.",
-            "Hard work doesn’t guarantee success—but being soft guarantees failure.",
-            "You can cry, complain, or conquer. Pick one. Only one gets results.",
-            "You’ve been ‘figuring it out’ for years. Start moving or admit you’re scared.",
-            "If you can scroll for hours, you can grind for ten minutes. Start there.",
-            "You want the lifestyle. But do you want the work, or just the aesthetic?",
-            "Every excuse you tell yourself is a brick in the wall you’re trapped behind.",
-            "Nobody owes you motivation. Get up and earn it.",
-            "If you're not embarrassed by how little you've done, you should be.",
-            "Waiting for the ‘right time’? It passed 100 excuses ago.",
-            "You’re not failing. You’re stalling—on purpose—because you fear growth.",
-            "Your dreams aren't too big. Your habits are just pathetic.",
-            "Prove them wrong? No. Prove *you* wrong—for ever doubting yourself.",
-            "You're either the reason it happens or the reason it doesn't.",
-            "The grind doesn’t care how you feel. Show up anyway.",
-            "You don’t need balance—you need obsession, until you earn options.",
-            "Want a breakthrough? Break your routine first.",
-            "Everyone’s tired. The winners just keep going.",
-            "You’re wasting potential people would kill to have. That’s disrespectful.",
-            "If you don’t take control of your time, someone dumber than you will.",
-            "‘I’ll start tomorrow’ is the mating call of mediocrity.",
-            "Self-doubt isn’t humility—it’s self-sabotage dressed as modesty.",
-        ]
+        quotes = quotes_db.motivational_quotes()
         return random.choice(quotes)
 
     def get_random_focus_tip(self):
         """Return a short and brutal roast to trigger productivity"""
-        tips = [
-            "You're not stuck—you’re just lazy with a Wi-Fi connection.",
-            "You had time. You just scrolled through it.",
-            "Your work ethic called. It’s missing.",
-            "Keep avoiding tasks. Regret loves company.",
-            "You fantasize about success, but commit to comfort.",
-            "Half effort, half results. You earned that mediocrity.",
-            "You’re not 'too busy'—you’re just soft.",
-            "Another break? You haven’t even earned one.",
-            "Deadlines aren’t scary. Your attitude is.",
-            "You dodge work like it's chasing you with ambition.",
-            "Discipline > dopamine. But keep chasing likes.",
-            "You binge YouTube, not effort. That’s why you’re behind.",
-            "You’re not overwhelmed. You’re underprepared.",
-            "If laziness paid, you’d be a billionaire.",
-            "Still waiting for the 'right moment'? It's been years.",
-            "You hustle like success is optional.",
-            "Can’t focus? Try caring.",
-            "You post quotes. Others live them.",
-            "You’re not tired—you’re just untrained.",
-            "Keep slacking. Someone hungry is eating your dream.",
-        ]
-        return random.choice(tips)
+        quotes = quotes_db.productivity_quotes()
+        return random.choice(quotes)
 
     def get_random_header(self):
-        subtitles = [
-            "Lazy? Prepare to be forgotten.",
-            "Excuses are your coffin nails.",
-            "Distraction is self-sabotage.",
-            "Stop whining. Start dominating.",
-            "Comfort zones kill dreams.",
-            "Hustle or become irrelevant.",
-            "Weakness is your real enemy.",
-            "Focus or fail—your choice.",
-            "Time wasted is life stolen.",
-            "Quit fear. Embrace pain.",
-            "Procrastination breeds regret.",
-            "Discipline beats talent daily.",
-            "Your mind’s weak. Train it.",
-            "No grind. No glory.",
-            "Stop scrolling. Start doing.",
-            "Dreams die in comfort.",
-            "Mediocrity is a slow death.",
-            "Hustle like your life depends on it.",
-            "You’re soft. Fix that.",
-            "Results demand ruthless focus.",
-        ]
-        return random.choice(subtitles)
+        """Return a short header quote"""
+        quotes = quotes_db.header_quotes()
+        return random.choice(quotes)
 
     def get_random_success(self):
-        success_messages = [
-            "Done. Don’t fuck up tomorrow.",
-            "Finished. No excuses next time.",
-            "You worked. Now prove it.",
-            "Session over. Stay relentless.",
-            "Done today. No slacking.",
-            "Focus won. Don’t lose it.",
-            "Good. Now don’t quit.",
-            "Session complete. Grind on.",
-            "You showed up. Again tomorrow.",
-            "No breaks. Only hustle.",
-        ]
-
-        return random.choice(success_messages)
+        """Return a success quote"""
+        quotes = quotes_db.success_quotes()
+        return random.choice(quotes)
 
 
 def main():

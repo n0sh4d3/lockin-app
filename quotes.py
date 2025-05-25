@@ -1,0 +1,30 @@
+def motivational_quotes():
+    """Return a ruthless motivational quote that hits like a slap to the face"""
+    quotes = [
+        "You don’t need a new plan. You need to stop being a little bitch about the current one.",
+        "You keep quitting when it gets hard. That’s why you never win.",
+        "Success isn’t avoiding pain. It’s eating it until it stops scaring you.",
+        "You’re not unlucky. You’re undisciplined.",
+        "Hard work doesn’t guarantee success—but being soft guarantees failure.",
+        "You can cry, complain, or conquer. Pick one. Only one gets results.",
+        "You’ve been ‘figuring it out’ for years. Start moving or admit you’re scared.",
+        "If you can scroll for hours, you can grind for ten minutes. Start there.",
+        "You want the lifestyle. But do you want the work, or just the aesthetic?",
+        "Every excuse you tell yourself is a brick in the wall you’re trapped behind.",
+        "Nobody owes you motivation. Get up and earn it.",
+        "If you're not embarrassed by how little you've done, you should be.",
+        "Waiting for the ‘right time’? It passed 100 excuses ago.",
+        "You’re not failing. You’re stalling—on purpose—because you fear growth.",
+        "Your dreams aren't too big. Your habits are just pathetic.",
+        "Prove them wrong? No. Prove *you* wrong—for ever doubting yourself.",
+        "You're either the reason it happens or the reason it doesn't.",
+        "The grind doesn’t care how you feel. Show up anyway.",
+        "You don’t need balance—you need obsession, until you earn options.",
+        "Want a breakthrough? Break your routine first.",
+        "Everyone’s tired. The winners just keep going.",
+        "You’re wasting potential people would kill to have. That’s disrespectful.",
+        "If you don’t take control of your time, someone dumber than you will.",
+        "‘I’ll start tomorrow’ is the mating call of mediocrity.",
+        "Self-doubt isn’t humility—it’s self-sabotage dressed as modesty.",
+    ]
+    return quotes

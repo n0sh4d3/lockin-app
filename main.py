@@ -19,6 +19,12 @@ from customtkinter import (
 import time
 import threading
 import random
+import http.server
+import socketserver
+import subprocess
+import os
+import platform
+import json
 from datetime import datetime
 from read_json_db import Database
 from colors import *
@@ -44,6 +50,8 @@ class FocusLockApp:
             set_appearance_mode("light")
         else:
             set_appearance_mode("dark")
+
+        self.platform = platform.system().lower()
 
     def start(self):
         self.app = CTk()

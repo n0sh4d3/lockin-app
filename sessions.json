@@ -3,9 +3,19 @@
     {
       "date": "2025-05-25 20:24:15",
       "focus_time": "1500"
+    },
+    {
+      "date": "2025-05-25 22:02:01",
+      "focus_time": "120"
+    },
+    {
+      "date": "2025-05-25 22:21:04",
+      "focus_time": "60"
     }
   ],
   "session_names": [
-    "Session #1"
+    "Session #1",
+    "Session #2",
+    "Session #3"
   ]
 }

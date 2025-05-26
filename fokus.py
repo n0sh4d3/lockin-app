@@ -24,6 +24,7 @@ import subprocess
 import os
 import platform
 import json
+import darkdetect
 from datetime import datetime
 from read_json_db import Database
 from colors import *
@@ -57,32 +58,50 @@ class FokusApp:
     def start(self):
         self.app = CTk()
         self.app.title("Fokus")
-        self.app.geometry("900x680")
+        self.app.geometry("1100x750")
         self.app.configure(fg_color=self.clrs.NEUTRAL_900)
         self.app.resizable(False, False)
 
-        self.header_font = CTkFont(family="Helvetica", size=30, weight="bold")
-        self.subheader_font = CTkFont(family="Helvetica", size=16)
-        self.timer_font = CTkFont(family="Helvetica", size=80, weight="bold")
-        self.label_font = CTkFont(family="Helvetica", size=13)
-        self.button_font = CTkFont(family="Helvetica", size=15, weight="bold")
-        self.stats_font = CTkFont(family="Helvetica", size=24, weight="bold")
-        self.tooltip_font = CTkFont(family="Helvetica", size=12)
+        self.header_font = CTkFont(family="SF Pro Display", size=32, weight="bold")
+        self.subheader_font = CTkFont(family="SF Pro Display", size=17)
+        self.timer_font = CTkFont(family="SF Pro Display", size=78, weight="bold")
+        self.label_font = CTkFont(family="SF Pro Display", size=14)
+        self.button_font = CTkFont(family="SF Pro Display", size=16, weight="bold")
+        self.stats_font = CTkFont(family="SF Pro Display", size=28, weight="bold")
+        self.tooltip_font = CTkFont(family="SF Pro Display", size=13)
 
         self.create_sidebar()
         self.create_main_container()
 
         self.show_setup_view()
         self.update_total_focus_time()
+        self.start_system_theme_monitoring()
 
         self.app.mainloop()
 
     def setup_theme(self):
         """Setup colors based on current theme"""
-        if self.current_theme == "light":
+        if self.current_theme == "system":
+            actual_theme = self.get_system_theme()
+        else:
+            actual_theme = self.current_theme
+
+        if actual_theme == "light":
             self.clrs = LightTheme()
         else:
             self.clrs = DarkTheme()
+
+        self.active_theme = actual_theme
+
+    def get_system_theme(self):
+        """Get the current system"""
+        try:
+            if darkdetect.isDark():
+                return "dark"
+            else:
+                return "light"
+        except Exception:
+            return "dark"
 
     def change_theme(self, theme_name):
         """Change the application theme"""
@@ -90,7 +109,7 @@ class FokusApp:
         self.settings_manager.set("theme", theme_name)
         self.setup_theme()
 
-        if theme_name == "light":
+        if self.active_theme == "light":
             set_appearance_mode("light")
         else:
             set_appearance_mode("dark")
@@ -602,7 +621,7 @@ class FokusApp:
 
         header_subtitle = CTkLabel(
             master=self.header_container,
-            text=self.get_random_success(),
+            text=self.quotes.get_random_success(),
             font=self.subheader_font,
             text_color=self.clrs.NEUTRAL_400,
         )
@@ -641,7 +660,7 @@ class FokusApp:
 
         success_title = CTkLabel(
             master=center_frame,
-            text=self.get_random_success(),
+            text=self.quotes.get_random_success(),
             font=CTkFont(family="Helvetica", size=26, weight="bold"),
             text_color=self.clrs.FG_COLOR,
         )
@@ -1564,3 +1583,38 @@ class FokusApp:
         delete_btn.pack(side="left")
 
         dialog.bind("<Escape>", lambda e: cancel_delete())
+
+    def start_system_theme_monitoring(self):
+        """Start monitoring system theme changes (if you want real-time updates)"""
+        if self.current_theme == "system":
+
+            def check_system_theme():
+                if self.current_theme == "system":
+                    new_system_theme = self.get_system_theme()
+                    if (
+                        hasattr(self, "active_theme")
+                        and new_system_theme != self.active_theme
+                    ):
+                        self.setup_theme()
+                        if new_system_theme == "light":
+                            set_appearance_mode("light")
+                        else:
+                            set_appearance_mode("dark")
+
+                        self.app.configure(fg_color=self.clrs.NEUTRAL_900)
+                        self.update_sidebar_colors()
+
+                        if hasattr(self, "current_view"):
+                            current_view = self.current_view
+                            if current_view == "setup":
+                                self.show_setup_view()
+                            elif current_view == "statistics":
+                                self.show_statistics_view()
+                            elif current_view == "settings":
+                                self.show_settings_view(True)
+                            elif current_view == "countdown":
+                                self.update_countdown_colors()
+
+                self.app.after(5000, check_system_theme)
+
+            self.app.after(1000, check_system_theme)

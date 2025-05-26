@@ -1,3 +1,34 @@
+import random
+
+
+# this mf is just to get shit out of main app
+class QuoteHandler:
+    """Handless all quote-related functionality"""
+
+    def __init__(self) -> None:
+        pass
+
+    def get_random_quote(self):
+        """Return a ruthless motivational quote that hits like a slap to the face"""
+        quotes = motivational_quotes()
+        return random.choice(quotes)
+
+    def get_random_focus_tips(self):
+        """Return a short and brutal roast to trigger productivity"""
+        quotes = productivity_quotes()
+        return random.choice(quotes)
+
+    def get_random_header(self):
+        """Return short header quote"""
+        quotes = header_quotes()
+        return random.choice(quotes)
+
+    def get_random_success(self):
+        """Return a success quote"""
+        quotes = success_quotes()
+        return random.choice(quotes)
+
+
 def motivational_quotes():
     quotes = [
         "No one’s coming. Save yourself.",
@@ -251,7 +282,6 @@ def header_quotes():
         "Your laziness writes your legacy.",
         "Run toward the discomfort.",
         "Too tired? That’s when it starts.",
-        # 🔥 Brutal new batch 🔥
         "Move or be moved.",
         "Excuses are lies.",
         "No grind. No glory.",

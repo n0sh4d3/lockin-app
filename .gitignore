@@ -1,6 +1,5 @@
 # user defined settings
-fokus_settings.json
-sessions.json
+*.json
 
 
 

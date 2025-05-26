@@ -1,3 +1,4 @@
 customtkinter==5.2.2
 darkdetect==0.8.0
+dnslib==0.9.26
 packaging==25.0

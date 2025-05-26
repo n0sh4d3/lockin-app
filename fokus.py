@@ -18,17 +18,14 @@ from customtkinter import (
 # forgot why i even have pillow installed lol
 import time
 import threading
-import http.server
-import socketserver
-import subprocess
-import os
 import platform
-import json
 import darkdetect
 from datetime import datetime
 from read_json_db import Database
 from colors import *
+from settings_manager import SettingsManager
 from quotes.quotes_handler import QuoteHandler
+from websiteblocker import WebsiteBlocker
 
 
 class FokusApp:
@@ -54,6 +51,7 @@ class FokusApp:
         self.quotes = QuoteHandler()
 
         self.platform = platform.system().lower()
+        self.init_website_blocker()
 
     def start(self):
         self.app = CTk()
@@ -1021,6 +1019,8 @@ class FokusApp:
         )
         sound_switch.pack(side="right")
 
+        self.create_website_blocking_section(appearance_tab)
+
         self.create_settings_section(appearance_tab, "Theme Settings")
         self.create_theme_section(appearance_tab)
 
@@ -1234,11 +1234,25 @@ class FokusApp:
 
         self.current_session_seconds = total_seconds
 
+        if self.settings_manager.get("website_blocking_enabled", False) and hasattr(
+            self, "website_blocker"
+        ):
+            if not self.website_blocker.is_admin():
+                self.status_label.configure(
+                    text="Admin privileges required for website blocking. Run as administrator."
+                )
+                return
+
+            if not self.website_blocker.start_blocking():
+                self.status_label.configure(
+                    text="Failed to start website blocking. Check permissions."
+                )
+                return
+
         self.show_countdown_view()
         self.set_navigation_state(False)
 
         self.total_countdown_seconds = total_seconds
-
         self.is_finished = False
         self.countdown_running = True
         self.is_paused = False
@@ -1320,8 +1334,11 @@ class FokusApp:
         """Called when countdown completes"""
         self.countdown_running = False
         self.is_paused = False
-        self.set_navigation_state(True)
 
+        if hasattr(self, "website_blocker"):
+            self.website_blocker.stop_blocking()
+
+        self.set_navigation_state(True)
         self.show_completion_view()
 
     def cancel_countdown(self):
@@ -1329,6 +1346,9 @@ class FokusApp:
         if self.countdown_running:
             self.countdown_running = False
             self.is_paused = False
+
+            if hasattr(self, "website_blocker"):
+                self.website_blocker.stop_blocking()
 
             if self.countdown_thread:
                 self.countdown_thread.join(0.5)
@@ -1618,3 +1638,177 @@ class FokusApp:
                 self.app.after(5000, check_system_theme)
 
             self.app.after(1000, check_system_theme)
+
+    def init_website_blocker(self):
+        """Initialize website blocker"""
+        self.website_blocker = WebsiteBlocker(self.platform)
+
+        # Load blocked sites from settings
+        blocked_sites = self.settings_manager.get("blocked_sites", [])
+        for site in blocked_sites:
+            self.website_blocker.add_blocked_site(site)
+
+    def create_website_blocking_section(self, master):
+        """Create website blocking settings section"""
+        self.create_settings_section(master, "Website Blocking")
+
+        # Enable/disable website blocking
+        blocking_frame = CTkFrame(master=master, fg_color="transparent")
+        blocking_frame.pack(fill="x", pady=5)
+
+        blocking_label = CTkLabel(
+            master=blocking_frame,
+            text="Block websites during focus sessions",
+            font=self.label_font,
+            text_color=self.clrs.FG_COLOR,
+        )
+        blocking_label.pack(side="left")
+
+        blocking_enabled = self.settings_manager.get("website_blocking_enabled", False)
+
+        def toggle_blocking():
+            current = self.settings_manager.get("website_blocking_enabled", False)
+            new_value = not current
+            self.settings_manager.set("website_blocking_enabled", new_value)
+
+            if new_value:
+                blocking_switch.configure(
+                    text="ON",
+                    fg_color=self.clrs.SUCCESS,
+                    hover_color=self.clrs.SUCCESS_DARK,
+                )
+            else:
+                blocking_switch.configure(
+                    text="OFF",
+                    fg_color=self.clrs.NEUTRAL_700,
+                    hover_color=self.clrs.NEUTRAL_600,
+                )
+
+        blocking_switch = CTkButton(
+            master=blocking_frame,
+            text="ON" if blocking_enabled else "OFF",
+            font=self.label_font,
+            fg_color=self.clrs.SUCCESS if blocking_enabled else self.clrs.NEUTRAL_700,
+            text_color=self.clrs.FG_COLOR
+            if blocking_enabled
+            else self.clrs.NEUTRAL_300,
+            hover_color=self.clrs.SUCCESS_DARK
+            if blocking_enabled
+            else self.clrs.NEUTRAL_600,
+            width=60,
+            height=30,
+            corner_radius=15,
+            command=toggle_blocking,
+        )
+        blocking_switch.pack(side="right")
+
+        # Website list management
+        sites_frame = CTkFrame(master=master, fg_color="transparent")
+        sites_frame.pack(fill="x", pady=(10, 5))
+
+        sites_label = CTkLabel(
+            master=sites_frame,
+            text="Blocked websites:",
+            font=self.label_font,
+            text_color=self.clrs.FG_COLOR,
+        )
+        sites_label.pack(anchor="w")
+
+        # Input frame for adding new sites
+        input_frame = CTkFrame(master=master, fg_color="transparent")
+        input_frame.pack(fill="x", pady=5)
+
+        self.site_entry = CTkEntry(
+            master=input_frame,
+            placeholder_text="Enter website (e.g., facebook.com)",
+            width=300,
+            height=35,
+            font=self.label_font,
+            fg_color=self.clrs.NEUTRAL_700,
+            border_color=self.clrs.NEUTRAL_600,
+            text_color=self.clrs.FG_COLOR,
+        )
+        self.site_entry.pack(side="left", padx=(0, 10))
+
+        def add_site():
+            site = self.site_entry.get().strip()
+            if site and hasattr(self, "website_blocker"):
+                self.website_blocker.add_blocked_site(site)
+
+                # Save to settings
+                blocked_sites = list(self.website_blocker.blocked_sites)
+                self.settings_manager.set("blocked_sites", blocked_sites)
+
+                self.site_entry.delete(0, "end")
+                self.refresh_blocked_sites_list()
+
+        add_button = CTkButton(
+            master=input_frame,
+            text="Add",
+            font=self.label_font,
+            fg_color=self.clrs.PRIMARY,
+            text_color=self.clrs.FG_COLOR,
+            hover_color=self.clrs.PRIMARY_DARK,
+            width=80,
+            height=35,
+            corner_radius=8,
+            command=add_site,
+        )
+        add_button.pack(side="left")
+
+        # Bind Enter key to add site
+        self.site_entry.bind("<Return>", lambda e: add_site())
+
+        # Scrollable frame for blocked sites list
+        self.sites_list_frame = CTkScrollableFrame(
+            master=master, fg_color=self.clrs.NEUTRAL_700, corner_radius=8, height=150
+        )
+        self.sites_list_frame.pack(fill="x", pady=(10, 0))
+
+        self.refresh_blocked_sites_list()
+
+    # Add this method to refresh the blocked sites list
+    def refresh_blocked_sites_list(self):
+        """Refresh the blocked sites list display"""
+        # Clear existing items
+        for widget in self.sites_list_frame.winfo_children():
+            widget.destroy()
+
+        if not hasattr(self, "website_blocker"):
+            return
+
+        for site in sorted(self.website_blocker.blocked_sites):
+            site_frame = CTkFrame(master=self.sites_list_frame, fg_color="transparent")
+            site_frame.pack(fill="x", pady=2)
+
+            site_label = CTkLabel(
+                master=site_frame,
+                text=site,
+                font=self.label_font,
+                text_color=self.clrs.FG_COLOR,
+                anchor="w",
+            )
+            site_label.pack(side="left", fill="x", expand=True, padx=(10, 0))
+
+            def remove_site(site_to_remove=site):
+                self.website_blocker.remove_blocked_site(site_to_remove)
+
+                # Save to settings
+                blocked_sites = list(self.website_blocker.blocked_sites)
+                self.settings_manager.set("blocked_sites", blocked_sites)
+
+                self.refresh_blocked_sites_list()
+
+            remove_button = CTkButton(
+                master=site_frame,
+                text="×",
+                font=CTkFont(size=16),
+                fg_color=self.clrs.DANGER,
+                text_color=self.clrs.FG_COLOR,
+                hover_color="#E11D48",
+                width=30,
+                height=30,
+                corner_radius=15,
+                command=remove_site,
+            )
+            remove_button.pack(side="right", padx=(5, 10))

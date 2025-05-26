@@ -1353,10 +1353,9 @@ class FocusLockApp:
 
         dialog = CTkToplevel(self.app)
         dialog.title("Rename Session")
-        dialog.geometry("400x200")
+        dialog.geometry("400x250")
         dialog.configure(fg_color=self.clrs.NEUTRAL_900)
         dialog.resizable(False, False)
-
         dialog.transient(self.app)
         dialog.grab_set()
         dialog.after(10, lambda: dialog.focus())
@@ -1386,6 +1385,36 @@ class FocusLockApp:
         )
         name_entry.pack(pady=10)
         name_entry.insert(0, current_name)
+
+        char_counter = CTkLabel(
+            master=dialog,
+            text=f"{len(current_name)}/19",
+            font=self.label_font,
+            text_color=self.clrs.FG_COLOR,
+        )
+        char_counter.pack(pady=(0, 10))
+
+        def on_text_change(*args):
+            current_text = name_entry.get()
+            char_count = len(current_text)
+
+            char_counter.configure(text=f"{char_count}/19")
+
+            if char_count > 19:
+                char_counter.configure(text_color="#FF4444")
+                name_entry.configure(border_color="#FF4444")
+            elif char_count >= 17:
+                char_counter.configure(text_color="#FFAA00")
+                name_entry.configure(border_color=self.clrs.NEUTRAL_600)
+            else:
+                char_counter.configure(text_color=self.clrs.FG_COLOR)
+                name_entry.configure(border_color=self.clrs.NEUTRAL_600)
+
+            if char_count > 19:
+                name_entry.delete(19, "end")
+
+        name_entry.bind("<KeyRelease>", on_text_change)
+        name_entry.bind("<KeyPress>", lambda e: dialog.after(1, on_text_change))
 
         dialog.after(100, lambda: name_entry.focus())
         dialog.after(110, lambda: name_entry.select_range(0, "end"))

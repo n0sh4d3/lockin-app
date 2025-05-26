@@ -1,0 +1,13 @@
+{
+  "theme": "dark",
+  "website_blocking_enabled": true,
+  "blocked_sites": [
+    "facebook.com",
+    "twitter.com",
+    "instagram.com",
+    "youtube.com",
+    "tiktok.com",
+    "reddit.com"
+  ],
+  "test_key": "test_value"
+}

@@ -947,10 +947,8 @@ class FokusApp:
         """Display the settings view"""
         self.current_view = "settings"
         self.update_navigation("Settings")
-
         for widget in self.header_container.winfo_children():
             widget.destroy()
-
         header_title = CTkLabel(
             master=self.header_container,
             text="Settings",
@@ -958,7 +956,6 @@ class FokusApp:
             text_color=self.clrs.FG_COLOR,
         )
         header_title.pack(anchor="w")
-
         header_subtitle = CTkLabel(
             master=self.header_container,
             text="Customize your experience",
@@ -966,17 +963,14 @@ class FokusApp:
             text_color=self.clrs.NEUTRAL_400,
         )
         header_subtitle.pack(anchor="w")
-
         for widget in self.content_container.winfo_children():
             widget.destroy()
-
         settings_container = CTkFrame(
             master=self.content_container,
             fg_color=self.clrs.NEUTRAL_800,
             corner_radius=15,
         )
         settings_container.pack(expand=True, fill="both", pady=20)
-
         settings_tabs = CTkTabview(
             master=settings_container,
             fg_color=self.clrs.NEUTRAL_800,
@@ -988,16 +982,13 @@ class FokusApp:
             text_color=self.clrs.FG_COLOR,
         )
         settings_tabs.pack(fill="both", expand=True, padx=30, pady=30)
-
         general_tab = settings_tabs.add("General")
         appearance_tab = settings_tabs.add("Appearance")
         notifications_tab = settings_tabs.add("Notifications")
 
         self.create_settings_section(general_tab, "Sound Settings")
-
         sound_frame = CTkFrame(master=general_tab, fg_color="transparent")
         sound_frame.pack(fill="x", pady=5)
-
         sound_label = CTkLabel(
             master=sound_frame,
             text="Play sound when session ends",
@@ -1005,7 +996,6 @@ class FokusApp:
             text_color=self.clrs.FG_COLOR,
         )
         sound_label.pack(side="left")
-
         sound_switch = CTkButton(
             master=sound_frame,
             text="ON",
@@ -1019,16 +1009,20 @@ class FokusApp:
         )
         sound_switch.pack(side="right")
 
-        self.create_website_blocking_section(appearance_tab)
+        # Appearance Tab - Make it scrollable
+        appearance_scrollable = CTkScrollableFrame(
+            master=appearance_tab, fg_color="transparent"
+        )
+        appearance_scrollable.pack(fill="both", expand=True, padx=0, pady=0)
 
-        self.create_settings_section(appearance_tab, "Theme Settings")
-        self.create_theme_section(appearance_tab)
+        self.create_website_blocking_section(appearance_scrollable)
+        self.create_settings_section(appearance_scrollable, "Theme Settings")
+        self.create_theme_section(appearance_scrollable)
 
+        # Notifications Tab Content
         self.create_settings_section(notifications_tab, "Notification Settings")
-
         notifications_frame = CTkFrame(master=notifications_tab, fg_color="transparent")
         notifications_frame.pack(fill="x", pady=5)
-
         notifications_label = CTkLabel(
             master=notifications_frame,
             text="Enable desktop notifications",
@@ -1036,7 +1030,6 @@ class FokusApp:
             text_color=self.clrs.FG_COLOR,
         )
         notifications_label.pack(side="left")
-
         notifications_switch = CTkButton(
             master=notifications_frame,
             text="ON",
@@ -1052,7 +1045,6 @@ class FokusApp:
 
         reminder_frame = CTkFrame(master=notifications_tab, fg_color="transparent")
         reminder_frame.pack(fill="x", pady=5)
-
         reminder_label = CTkLabel(
             master=reminder_frame,
             text="Remind me to take breaks",
@@ -1060,7 +1052,6 @@ class FokusApp:
             text_color=self.clrs.FG_COLOR,
         )
         reminder_label.pack(side="left")
-
         reminder_switch = CTkButton(
             master=reminder_frame,
             text="OFF",
@@ -1076,7 +1067,6 @@ class FokusApp:
 
         version_frame = CTkFrame(master=settings_container, fg_color="transparent")
         version_frame.pack(side="bottom", fill="x", padx=30, pady=20)
-
         version_label = CTkLabel(
             master=version_frame,
             text="Focus v0.0.1",
@@ -1643,16 +1633,19 @@ class FokusApp:
         """Initialize website blocker"""
         self.website_blocker = WebsiteBlocker(self.platform)
 
-        # Load blocked sites from settings
         blocked_sites = self.settings_manager.get("blocked_sites", [])
-        for site in blocked_sites:
-            self.website_blocker.add_blocked_site(site)
+
+        # it's just to shut up ruff/pyright whatver gives me fucking error
+        if blocked_sites is not None:
+            for site in blocked_sites:
+                self.website_blocker.add_blocked_site(site)
+        else:
+            print("")
 
     def create_website_blocking_section(self, master):
         """Create website blocking settings section"""
         self.create_settings_section(master, "Website Blocking")
 
-        # Enable/disable website blocking
         blocking_frame = CTkFrame(master=master, fg_color="transparent")
         blocking_frame.pack(fill="x", pady=5)
 
@@ -1702,7 +1695,6 @@ class FokusApp:
         )
         blocking_switch.pack(side="right")
 
-        # Website list management
         sites_frame = CTkFrame(master=master, fg_color="transparent")
         sites_frame.pack(fill="x", pady=(10, 5))
 
@@ -1714,7 +1706,6 @@ class FokusApp:
         )
         sites_label.pack(anchor="w")
 
-        # Input frame for adding new sites
         input_frame = CTkFrame(master=master, fg_color="transparent")
         input_frame.pack(fill="x", pady=5)
 
@@ -1735,7 +1726,6 @@ class FokusApp:
             if site and hasattr(self, "website_blocker"):
                 self.website_blocker.add_blocked_site(site)
 
-                # Save to settings
                 blocked_sites = list(self.website_blocker.blocked_sites)
                 self.settings_manager.set("blocked_sites", blocked_sites)
 
@@ -1756,10 +1746,8 @@ class FokusApp:
         )
         add_button.pack(side="left")
 
-        # Bind Enter key to add site
         self.site_entry.bind("<Return>", lambda e: add_site())
 
-        # Scrollable frame for blocked sites list
         self.sites_list_frame = CTkScrollableFrame(
             master=master, fg_color=self.clrs.NEUTRAL_700, corner_radius=8, height=150
         )
@@ -1767,10 +1755,8 @@ class FokusApp:
 
         self.refresh_blocked_sites_list()
 
-    # Add this method to refresh the blocked sites list
     def refresh_blocked_sites_list(self):
         """Refresh the blocked sites list display"""
-        # Clear existing items
         for widget in self.sites_list_frame.winfo_children():
             widget.destroy()
 
@@ -1793,7 +1779,6 @@ class FokusApp:
             def remove_site(site_to_remove=site):
                 self.website_blocker.remove_blocked_site(site_to_remove)
 
-                # Save to settings
                 blocked_sites = list(self.website_blocker.blocked_sites)
                 self.settings_manager.set("blocked_sites", blocked_sites)
 

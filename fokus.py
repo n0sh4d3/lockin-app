@@ -1,7 +1,6 @@
 # todo
 # block sites when locking in hard
-# gamifying this shit would be fire but man this will be fucking hard
-# fix bug saying that i need to be admin to run this bs
+# gamifying this shit would be fire
 from customtkinter import (
     CTk,
     CTkButton,
@@ -16,13 +15,14 @@ from customtkinter import (
     StringVar,
 )
 
+# forgot why i even have pillow installed lol
 import time
 import threading
 import platform
 import darkdetect
 from datetime import datetime
 from read_json_db import Database
-from colors import *  # pyright: ignore[F403]
+from colors import *
 from settings_manager import SettingsManager
 from quotes.quotes_handler import QuoteHandler
 from websiteblocker import WebsiteBlocker
@@ -85,9 +85,9 @@ class FokusApp:
             actual_theme = self.current_theme
 
         if actual_theme == "light":
-            self.clrs = LightTheme()  # pyright: ignore[F405]
+            self.clrs = LightTheme()
         else:
-            self.clrs = DarkTheme()  # pyright: ignore[F405]
+            self.clrs = DarkTheme()
 
         self.active_theme = actual_theme
 

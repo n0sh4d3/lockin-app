@@ -1,6 +1,3 @@
-"""I know i called it settings but this is just all em collors for ma app :3"""
-
-
 class Colors:
     def __init__(self) -> None:
         self.FG_COLOR = "#fcfbf8"

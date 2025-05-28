@@ -26,6 +26,7 @@ from colors import *
 from settings_manager import SettingsManager
 from quotes.quotes_handler import QuoteHandler
 from websiteblocker import WebsiteBlocker
+import random
 
 
 class FokusApp:
@@ -1291,6 +1292,7 @@ class FokusApp:
 
         if self.is_paused:
             self.pause_button.configure(text="RESUME")
+            self.fuck_you_dialog(option="pause")
         else:
             self.pause_button.configure(text="PAUSE")
 
@@ -1343,6 +1345,7 @@ class FokusApp:
             if self.countdown_thread:
                 self.countdown_thread.join(0.5)
 
+            self.fuck_you_dialog(option="exit")
             self.show_setup_view()
             self.set_navigation_state(True)
 
@@ -1377,48 +1380,181 @@ class FokusApp:
         else:
             return f"{seconds}s"
 
-    def fuck_you_dialog(self):
-        from customtkinter import CTkToplevel
+    def fuck_you_dialog(self, option: str):
+        """Show brutal roast dialog when user tries to pause or quit — no mercy version."""
+        from customtkinter import CTkToplevel, CTkLabel, CTkButton, CTkFrame
+
+        self.dialog_result = None
+
+        pause_titles = [
+            "YOU’RE LOSING TO COMFORT.",
+            "DISCIPLINE SLIPPING.",
+            "HESITATION = FAILURE.",
+            "STILL MENTALLY WEAK?",
+            "YOU THINK WINNERS PAUSE?",
+            "STOP PRETENDING TO GRIND.",
+            "YOU'RE NOT TIRED, YOU'RE SOFT.",
+        ]
+
+        exit_titles = [
+            "BACK TO LOSER HABITS?",
+            "YOU NEVER REALLY WANTED IT.",
+            "QUITTING. AGAIN.",
+            "THIS IS WHY YOU STAY BROKE.",
+            "YOU'RE BUILT TO LOSE.",
+            "EVERY TIME YOU QUIT, YOU GET FURTHER FROM WHO YOU COULD BE.",
+            "GO AHEAD. WASTE ANOTHER DAY.",
+        ]
+
+        pause_roasts = [
+            "Paused? Why not just admit you're scared of success?",
+            "You pause every time it gets hard — no wonder you're stuck.",
+            "Comfort wins again. You're folding in real time.",
+            "Hesitation is the language of the lazy.",
+            "Pausing doesn’t recharge you. It rewires you to give up.",
+            "Your brain's begging to go soft — and you're letting it.",
+            "You're not ‘taking a break’ — you're avoiding growth.",
+            "Every pause is a brick in the wall separating you from who you want to be.",
+            "You don't need rest. You need to grow the fuck up.",
+            "Stop acting like the grind owes you comfort.",
+        ]
+
+        exit_roasts = [
+            "You're quitting? This is why your life looks the same every year.",
+            "Close the app. Close your potential. Same thing.",
+            "Quitting now guarantees you stay exactly where you are.",
+            "Every time you exit, your dreams fade a little more.",
+            "You're not tired. You're undisciplined.",
+            "You were never serious about this.",
+            "You run the second it stops being easy. That’s why you lose.",
+            "You’ve built a habit of quitting — congrats.",
+            "Quitting is the language of the average.",
+            "Discipline isn’t a vibe. It’s a decision. You just made the wrong one.",
+        ]
+
+        shame_labels = [
+            "This is the exact moment your future self will hate you for.",
+            "You’re at war with your weaker self.\nDon’t let them win again.",
+            "Lock in, or stay mediocre. No one’s coming to save you.",
+            "Every second you waste builds the life you’ll regret.",
+            "You either suffer now or suffer forever.\nMake the fucking choice.",
+            "You said you wanted to change. Prove it.",
+            "Discipline is earned, not given.\nKeep going.",
+            "This is what separates the real from the fake.\nAct accordingly.",
+        ]
+
+        quit_button_texts = [
+            "GIVE UP LIKE ALWAYS",
+            "QUIT AND STAY BROKE",
+            "RUN FROM GROWTH",
+            "KILL THE MOMENTUM",
+            "COWARD’S EXIT",
+        ]
+
+        continue_button_texts = [
+            "LOCK THE FUCK IN",
+            "PROVE YOU’RE DIFFERENT",
+            "GRIND DOESN’T PAUSE",
+            "GET BACK TO WAR",
+            "FOCUS OR DIE BROKE",
+        ]
+
+        if option == "pause":
+            title_text = random.choice(pause_titles)
+            roast_text = random.choice(pause_roasts)
+        elif option == "exit":
+            title_text = random.choice(exit_titles)
+            roast_text = random.choice(exit_roasts)
+        else:
+            title_text = "WEAK MOVE DETECTED"
+            roast_text = "You’re not even sure if you're pausing or quitting.\nThat's how lost you are."
+
+        shame_text = random.choice(shame_labels)
+        quit_text = random.choice(quit_button_texts)
+        continue_text = random.choice(continue_button_texts)
 
         dialog = CTkToplevel(self.app)
-        dialog.title("FUCK YOU")
-        dialog.geometry("400x250")
+        dialog.title("NO ESCAPE")
+        dialog.geometry("500x300")
         dialog.configure(fg_color=self.clrs.NEUTRAL_900)
         dialog.resizable(False, False)
         dialog.transient(self.app)
         dialog.grab_set()
         dialog.after(10, lambda: dialog.focus())
 
-        cancel_btn = CTkButton(
+        title_label = CTkLabel(
+            master=dialog,
+            text=title_text,
+            font=self.subheader_font,
+            text_color=self.clrs.PRIMARY,
+        )
+        title_label.pack(pady=(20, 10))
+
+        roast_label = CTkLabel(
+            master=dialog,
+            text=roast_text,
+            font=self.label_font,
+            text_color=self.clrs.WARNING,
+            justify="center",
+            wraplength=450,
+        )
+        roast_label.pack(pady=20)
+
+        shame_label = CTkLabel(
+            master=dialog,
+            text=shame_text,
+            font=self.label_font,
+            text_color=self.clrs.NEUTRAL_300,
+            justify="center",
+        )
+        shame_label.pack(pady=10)
+
+        def quit_like_coward():
+            self.dialog_result = "quit"
+
+            # dunno if that's the right thing, but man it'd soin the job lmao
+            self.cancel_countdown()
+            dialog.destroy()
+
+        def get_back_to_work():
+            if option == "pause":
+                self.toggle_pause()
+            dialog.destroy()
+
+        buttons_frame = CTkFrame(master=dialog, fg_color="transparent")
+        buttons_frame.pack(pady=30)
+
+        quit_btn = CTkButton(
             master=buttons_frame,
-            text="i give up",
+            text=quit_text,
             font=self.button_font,
             fg_color=self.clrs.NEUTRAL_700,
             text_color=self.clrs.NEUTRAL_300,
             hover_color=self.clrs.NEUTRAL_600,
-            width=100,
+            width=160,
             height=40,
             corner_radius=8,
-            command=give_up,
+            command=quit_like_coward,
         )
-        cancel_btn.pack(side="left", padx=(0, 10))
+        quit_btn.pack(side="left", padx=(0, 20))
 
-        save_btn = CTkButton(
+        continue_btn = CTkButton(
             master=buttons_frame,
-            text="I'M LOCKING IN",
+            text=continue_text,
             font=self.button_font,
             fg_color=self.clrs.SUCCESS,
             text_color=self.clrs.FG_COLOR,
             hover_color=self.clrs.SUCCESS_DARK,
-            width=100,
+            width=160,
             height=40,
             corner_radius=8,
-            command=save_rename,
+            command=get_back_to_work,
         )
-        save_btn.pack(side="left")
+        continue_btn.pack(side="left")
 
-        def give_up():
-            dialog.destroy()
+        # Force escape to continue
+        dialog.bind("<Escape>", lambda e: get_back_to_work())
+        dialog.after(100, lambda: continue_btn.focus())
 
     def show_rename_dialog(self, session_index):
         """Show dialog to rename a session"""

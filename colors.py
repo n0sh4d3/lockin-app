@@ -1,7 +1,4 @@
-"""Light colorscheme for fokus app"""
-
-import json
-import os
+"""Colorschemes for fokus app"""
 
 
 class LightTheme:

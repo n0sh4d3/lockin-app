@@ -1377,6 +1377,49 @@ class FokusApp:
         else:
             return f"{seconds}s"
 
+    def fuck_you_dialog(self):
+        from customtkinter import CTkToplevel
+
+        dialog = CTkToplevel(self.app)
+        dialog.title("FUCK YOU")
+        dialog.geometry("400x250")
+        dialog.configure(fg_color=self.clrs.NEUTRAL_900)
+        dialog.resizable(False, False)
+        dialog.transient(self.app)
+        dialog.grab_set()
+        dialog.after(10, lambda: dialog.focus())
+
+        cancel_btn = CTkButton(
+            master=buttons_frame,
+            text="i give up",
+            font=self.button_font,
+            fg_color=self.clrs.NEUTRAL_700,
+            text_color=self.clrs.NEUTRAL_300,
+            hover_color=self.clrs.NEUTRAL_600,
+            width=100,
+            height=40,
+            corner_radius=8,
+            command=give_up,
+        )
+        cancel_btn.pack(side="left", padx=(0, 10))
+
+        save_btn = CTkButton(
+            master=buttons_frame,
+            text="I'M LOCKING IN",
+            font=self.button_font,
+            fg_color=self.clrs.SUCCESS,
+            text_color=self.clrs.FG_COLOR,
+            hover_color=self.clrs.SUCCESS_DARK,
+            width=100,
+            height=40,
+            corner_radius=8,
+            command=save_rename,
+        )
+        save_btn.pack(side="left")
+
+        def give_up():
+            dialog.destroy()
+
     def show_rename_dialog(self, session_index):
         """Show dialog to rename a session"""
         from customtkinter import CTkToplevel
@@ -1797,3 +1840,10 @@ class FokusApp:
                 command=remove_site,
             )
             remove_button.pack(side="right", padx=(5, 10))
+
+    _   _       
+  /   V   \   
+  |       |  
+   \     /  
+     \ /   
+      *  

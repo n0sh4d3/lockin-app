@@ -1840,10 +1840,3 @@ class FokusApp:
                 command=remove_site,
             )
             remove_button.pack(side="right", padx=(5, 10))
-
-    _   _       
-  /   V   \   
-  |       |  
-   \     /  
-     \ /   
-      *  

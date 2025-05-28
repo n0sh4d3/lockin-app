@@ -55,6 +55,7 @@ class FokusApp:
         self.init_website_blocker()
 
     def start(self):
+        """App is running (lezz goo)"""
         self.app = CTk()
         self.app.title("Fokus")
         self.app.geometry("1100x750")
@@ -86,9 +87,9 @@ class FokusApp:
             actual_theme = self.current_theme
 
         if actual_theme == "light":
-            self.clrs = LightTheme()
+            self.clrs = LightTheme()  # pyright: ignore[F405]
         else:
-            self.clrs = DarkTheme()
+            self.clrs = DarkTheme()  # pyright: ignore[F405]
 
         self.active_theme = actual_theme
 
@@ -1010,7 +1011,6 @@ class FokusApp:
         )
         sound_switch.pack(side="right")
 
-        # Appearance Tab - Make it scrollable
         appearance_scrollable = CTkScrollableFrame(
             master=appearance_tab, fg_color="transparent"
         )
@@ -1020,7 +1020,6 @@ class FokusApp:
         self.create_settings_section(appearance_scrollable, "Theme Settings")
         self.create_theme_section(appearance_scrollable)
 
-        # Notifications Tab Content
         self.create_settings_section(notifications_tab, "Notification Settings")
         notifications_frame = CTkFrame(master=notifications_tab, fg_color="transparent")
         notifications_frame.pack(fill="x", pady=5)

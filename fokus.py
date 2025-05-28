@@ -1335,18 +1335,20 @@ class FokusApp:
     def cancel_countdown(self):
         """Cancel the running countdown"""
         if self.countdown_running:
-            self.countdown_running = False
-            self.is_paused = False
-
-            if hasattr(self, "website_blocker"):
-                self.website_blocker.stop_blocking()
-
-            if self.countdown_thread:
-                self.countdown_thread.join(0.5)
-
             self.fuck_you_dialog(option="exit")
-            self.show_setup_view()
-            self.set_navigation_state(True)
+
+            if hasattr(self, "dialog_result") and self.dialog_result == "quit":
+                self.countdown_running = False
+                self.is_paused = False
+
+                if hasattr(self, "website_blocker"):
+                    self.website_blocker.stop_blocking()
+
+                if self.countdown_thread:
+                    self.countdown_thread.join(0.5)
+
+                self.show_setup_view()
+                self.set_navigation_state(True)
 
     def update_navigation(self, active_nav):
         """Update navigation buttons to reflect active section"""
@@ -1510,12 +1512,22 @@ class FokusApp:
 
         def quit_like_coward():
             self.dialog_result = "quit"
-
-            # dunno if that's the right thing, but man it'd soin the job lmao
-            self.cancel_countdown()
             dialog.destroy()
 
+            self.countdown_running = False
+            self.is_paused = False
+
+            if hasattr(self, "website_blocker"):
+                self.website_blocker.stop_blocking()
+
+            if self.countdown_thread:
+                self.countdown_thread.join(0.5)
+
+            self.show_setup_view()
+            self.set_navigation_state(True)
+
         def get_back_to_work():
+            self.dialog_result = "continue"
             if option == "pause":
                 self.toggle_pause()
             dialog.destroy()

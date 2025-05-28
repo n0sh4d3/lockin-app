@@ -1,3 +1,4 @@
+# YES JSON IS MY DB AND I'M PROUD OF IT
 from fokus import FokusApp
 
 

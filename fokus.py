@@ -1,6 +1,6 @@
 # todo
 # block sites when locking in hard
-# gamifying this shit would be fire
+# gamifying this shit would be fire (but hard tho)
 from customtkinter import (
     CTk,
     CTkButton,
@@ -15,14 +15,13 @@ from customtkinter import (
     StringVar,
 )
 
-# forgot why i even have pillow installed lol
 import time
 import threading
 import platform
 import darkdetect
 from datetime import datetime
 from read_json_db import Database
-from colors import *
+from colors import *  # pyright: ignore[F403]
 from settings_manager import SettingsManager
 from quotes.quotes_handler import QuoteHandler
 from websiteblocker import WebsiteBlocker
@@ -1395,6 +1394,16 @@ class FokusApp:
             "YOU THINK WINNERS PAUSE?",
             "STOP PRETENDING TO GRIND.",
             "YOU'RE NOT TIRED, YOU'RE SOFT.",
+            "COMFORT IS A PRISON.",
+            "YOU’RE NOT PAUSING, YOU’RE LOSING.",
+            "MENTAL WEAKNESS SHOWING.",
+            "GRIND PAUSES? NEVER.",
+            "YOU’RE SURRENDERING IN SLOW MOTION.",
+            "THIS IS WHERE LOSERS BAIL.",
+            "PAUSE? OR JUST GIVE UP?",
+            "FEAR HIDES BEHIND THAT PAUSE.",
+            "STOP PAUSING, START WINNING.",
+            "YOU’RE A GHOST OF POTENTIAL.",
         ]
 
         exit_titles = [
@@ -1403,8 +1412,17 @@ class FokusApp:
             "QUITTING. AGAIN.",
             "THIS IS WHY YOU STAY BROKE.",
             "YOU'RE BUILT TO LOSE.",
-            "EVERY TIME YOU QUIT, YOU GET FURTHER FROM WHO YOU COULD BE.",
             "GO AHEAD. WASTE ANOTHER DAY.",
+            "EXIT = EXCUSE.",
+            "YOU’RE QUITTING ON YOU.",
+            "NO GLORY FOR QUITTERS.",
+            "SAME SHIT, SAME FAILURE.",
+            "EXIT NOW, REGRET FOREVER.",
+            "QUITTING IS YOUR TRUE TALENT.",
+            "EXIT = DEATH OF DREAMS.",
+            "RUNNING FROM PAIN, RUNNING FROM GROWTH.",
+            "LOSERS EXIT, WINNERS FIGHT.",
+            "YOU’RE A LEGEND OF LETTING GO.",
         ]
 
         pause_roasts = [
@@ -1415,9 +1433,18 @@ class FokusApp:
             "Pausing doesn’t recharge you. It rewires you to give up.",
             "Your brain's begging to go soft — and you're letting it.",
             "You're not ‘taking a break’ — you're avoiding growth.",
-            "Every pause is a brick in the wall separating you from who you want to be.",
             "You don't need rest. You need to grow the fuck up.",
             "Stop acting like the grind owes you comfort.",
+            "Pause? Nah, you’re just scared of effort.",
+            "Every pause is a step back from greatness.",
+            "You call that a break? It’s a breakdown.",
+            "Comfort’s got you in a chokehold, huh?",
+            "You pause when it’s hard, losers fold early.",
+            "That pause is a silent apology to failure.",
+            "Mental softening in progress — keep it up.",
+            "You don’t pause a grind, you surrender it.",
+            "Pause now, cry later.",
+            "Pausing is procrastination’s ugly cousin.",
         ]
 
         exit_roasts = [
@@ -1431,6 +1458,16 @@ class FokusApp:
             "You’ve built a habit of quitting — congrats.",
             "Quitting is the language of the average.",
             "Discipline isn’t a vibe. It’s a decision. You just made the wrong one.",
+            "Exiting? You’re just running from the hard truth.",
+            "Quitters write their own obituary.",
+            "Exiting means you never really wanted it.",
+            "Every quit adds another brick to your failure wall.",
+            "Your quit streak is your legacy.",
+            "Quit now, stay average forever.",
+            "You exit the battlefield while others claim victory.",
+            "Quitting is your version of ‘trying.’",
+            "Exiting? More like surrendering to your excuses.",
+            "You don’t quit the game — you lose the game.",
         ]
 
         shame_labels = [
@@ -1442,6 +1479,16 @@ class FokusApp:
             "You said you wanted to change. Prove it.",
             "Discipline is earned, not given.\nKeep going.",
             "This is what separates the real from the fake.\nAct accordingly.",
+            "This is the exact moment your dreams die.",
+            "Your future self just facepalmed.",
+            "This pause is the grave of your ambitions.",
+            "You’re betraying the person you said you’d become.",
+            "Mediocrity just moved in.",
+            "Every second wasted builds a prison around your potential.",
+            "Discipline doesn’t knock twice — don’t ignore it.",
+            "Your legacy is decided right now — what’s it gonna be?",
+            "You’re fighting two battles: yourself and your excuses.",
+            "The hardest war is the one inside you.",
         ]
 
         quit_button_texts = [
@@ -1450,6 +1497,16 @@ class FokusApp:
             "RUN FROM GROWTH",
             "KILL THE MOMENTUM",
             "COWARD’S EXIT",
+            "GIVE UP AND STAY BASIC",
+            "QUITTERS HAVE NO FUTURE",
+            "DIE WITH YOUR DREAMS",
+            "COWARD’S WAY OUT",
+            "LOSE WITH PRIDE",
+            "SAY BYE TO SUCCESS",
+            "EXIT = FAILURE",
+            "RUNNING SCARED",
+            "NO BALLS BUTTON",
+            "CHICKEN OUT",
         ]
 
         continue_button_texts = [
@@ -1458,6 +1515,7 @@ class FokusApp:
             "GRIND DOESN’T PAUSE",
             "GET BACK TO WAR",
             "FOCUS OR DIE BROKE",
+            "FIGHT OR FUCK OFF",
         ]
 
         if option == "pause":
@@ -1477,7 +1535,7 @@ class FokusApp:
         dialog = CTkToplevel(self.app)
         dialog.title("NO ESCAPE")
         dialog.geometry("500x300")
-        dialog.configure(fg_color=self.clrs.NEUTRAL_900)
+        dialog.configure(fg_color=self.clrs.NEUTRAL_800)
         dialog.resizable(False, False)
         dialog.transient(self.app)
         dialog.grab_set()
@@ -1494,7 +1552,7 @@ class FokusApp:
         roast_label = CTkLabel(
             master=dialog,
             text=roast_text,
-            font=self.label_font,
+            font=self.subheader_font,
             text_color=self.clrs.WARNING,
             justify="center",
             wraplength=450,
@@ -1504,7 +1562,7 @@ class FokusApp:
         shame_label = CTkLabel(
             master=dialog,
             text=shame_text,
-            font=self.label_font,
+            font=self.subheader_font,
             text_color=self.clrs.NEUTRAL_300,
             justify="center",
         )

@@ -353,7 +353,9 @@ class FokusApp:
         preset_buttons_frame = CTkFrame(master=presets_frame, fg_color="transparent")
         preset_buttons_frame.pack()
 
+        self.create_preset_button(preset_buttons_frame, "10 min", 10, 00)
         self.create_preset_button(preset_buttons_frame, "25 min", 25, 00)
+        self.create_preset_button(preset_buttons_frame, "30 min", 30, 00)
         self.create_preset_button(preset_buttons_frame, "45 min", 45, 00)
         self.create_preset_button(preset_buttons_frame, "1 hour", 00, 1)
         self.create_preset_button(preset_buttons_frame, "2 hours", 00, 2)

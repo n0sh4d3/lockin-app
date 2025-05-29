@@ -1450,7 +1450,7 @@ class FokusApp:
         ]
 
         exit_roasts = [
-            "You're quitting? This is why your life looks the same every year.",
+            "This is why your life looks the same every year.",
             "Close the app. Close your potential. Same thing.",
             "Quitting now guarantees you stay exactly where you are.",
             "Every time you exit, your dreams fade a little more.",
@@ -1459,7 +1459,6 @@ class FokusApp:
             "You run the second it stops being easy. That’s why you lose.",
             "You’ve built a habit of quitting — congrats.",
             "Quitting is the language of the average.",
-            "Discipline isn’t a vibe. It’s a decision. You just made the wrong one.",
             "Exiting? You’re just running from the hard truth.",
             "Quitters write their own obituary.",
             "Exiting means you never really wanted it.",
@@ -1508,7 +1507,6 @@ class FokusApp:
             "EXIT = FAILURE",
             "RUNNING SCARED",
             "NO BALLS BUTTON",
-            "CHICKEN OUT",
         ]
 
         continue_button_texts = [
@@ -1517,7 +1515,6 @@ class FokusApp:
             "GRIND DOESN’T PAUSE",
             "GET BACK TO WAR",
             "FOCUS OR DIE BROKE",
-            "FIGHT OR FUCK OFF",
         ]
 
         if option == "pause":

@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
 import ctypes
 import subprocess
+import os
 
 
 # fuck off i'll use bare excepts and you shouldn't care

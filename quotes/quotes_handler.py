@@ -1,4 +1,5 @@
 import random
+from urllib.parse import quote_from_bytes
 
 
 # this mf is just to get shit out of main app

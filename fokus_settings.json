@@ -1,0 +1,12 @@
+{
+  "theme": "dark",
+  "website_blocking_enabled": false,
+  "blocked_sites": [
+    "facebook.com",
+    "twitter.com",
+    "instagram.com",
+    "youtube.com",
+    "tiktok.com",
+    "reddit.com"
+  ],
+}

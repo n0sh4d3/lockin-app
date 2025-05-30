@@ -22,9 +22,13 @@ import darkdetect
 from datetime import datetime
 from read_json_db import Database
 from colors import *  # pyright: ignore[F403]
+
+# ^  WHY NVIM IS STILL SHOWING WARNING???? (now it stopped) (ty magic comment)
+
 from settings_manager import SettingsManager
 from quotes.quotes_handler import QuoteHandler
 from websiteblocker import WebsiteBlocker
+from pydub import AudioSegment
 import random
 
 
@@ -1012,14 +1016,9 @@ class FokusApp:
         )
         sound_switch.pack(side="right")
 
-        appearance_scrollable = CTkScrollableFrame(
-            master=appearance_tab, fg_color="transparent"
-        )
-        appearance_scrollable.pack(fill="both", expand=True, padx=0, pady=0)
-
-        self.create_website_blocking_section(appearance_scrollable)
-        self.create_settings_section(appearance_scrollable, "Theme Settings")
-        self.create_theme_section(appearance_scrollable)
+        self.create_website_blocking_section(general_tab)
+        self.create_settings_section(appearance_tab, "Theme Settings")
+        self.create_theme_section(appearance_tab)
 
         self.create_settings_section(notifications_tab, "Notification Settings")
         notifications_frame = CTkFrame(master=notifications_tab, fg_color="transparent")
@@ -1620,7 +1619,6 @@ class FokusApp:
         )
         continue_btn.pack(side="left")
 
-        # Force escape to continue
         dialog.bind("<Escape>", lambda e: get_back_to_work())
         dialog.after(100, lambda: continue_btn.focus())
 

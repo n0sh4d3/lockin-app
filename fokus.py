@@ -24,16 +24,18 @@ from read_json_db import Database
 from colors import *  # pyright: ignore[F403]
 
 # ^  WHY NVIM IS STILL SHOWING WARNING???? (now it stopped) (ty magic comment)
+# IT'S FUCKED AGAIN XDDD
 
 from settings_manager import SettingsManager
 from quotes.quotes_handler import QuoteHandler
 from websiteblocker import WebsiteBlocker
-from pydub import AudioSegment
+from pygame import mixer
 import random
 
 
 class FokusApp:
     def __init__(self) -> None:
+        mixer.init()
         self.DB = Database()
         self.settings_manager = SettingsManager()
         self.is_finished = False
@@ -2042,3 +2044,8 @@ class FokusApp:
                 command=remove_site,
             )
             remove_button.pack(side="right", padx=(5, 10))
+
+    def play_sound(self):
+        if self.is_finished and not self.countdown_running:
+            mixer.music.load("alarms/ring1.wav")
+            mixer.music.play()

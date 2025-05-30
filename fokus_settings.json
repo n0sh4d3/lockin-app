@@ -1,5 +1,5 @@
 {
-  "theme": "dark",
+  "theme": "system",
   "website_blocking_enabled": false,
   "blocked_sites": [
     "facebook.com",
@@ -8,5 +8,5 @@
     "youtube.com",
     "tiktok.com",
     "reddit.com"
-  ],
+  ]
 }

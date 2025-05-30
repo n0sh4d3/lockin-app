@@ -1,6 +1,7 @@
 """This manages my json db (i'm proud)"""
 
 import json
+import os
 # ^ BOZO FORGOT TO IMPORT JSON
 
 
@@ -15,10 +16,9 @@ class SettingsManager:
             if os.path.exists(self.settings_file):
                 with open(self.settings_file, "r", encoding="utf-8") as f:
                     content = f.read().strip()
-                    if content:  # Check if file is not empty
+                    if content:
                         return json.loads(content)
 
-            # File doesn't exist or is empty, create default settings
             default_settings = {
                 "theme": "system",
                 "website_blocking_enabled": True,
@@ -31,7 +31,6 @@ class SettingsManager:
                     "reddit.com",
                 ],
             }
-            # Save default settings immediately
             self._write_settings(default_settings)
             return default_settings
 
@@ -59,7 +58,6 @@ class SettingsManager:
         try:
             with open(self.settings_file, "w", encoding="utf-8") as f:
                 json.dump(settings_data, f, indent=2, ensure_ascii=False)
-            print(f"Settings saved to {os.path.abspath(self.settings_file)}")
         except Exception as e:
             print(f"Error saving settings: {e}")
             raise

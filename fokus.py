@@ -793,7 +793,7 @@ class FokusApp:
             stats_cards,
             "TOTAL FOCUS TIME",
             self.format_time(self.total_focus_time),
-            self.clrs.PRIMARY,
+            self.clrs.SUCCESS,
         )
 
         avg_time = self.total_focus_time // max(len(self.DB.focus_times), 1)
@@ -801,7 +801,7 @@ class FokusApp:
             stats_cards,
             "AVERAGE",
             self.format_time(avg_time),
-            self.clrs.SUCCESS,
+            self.clrs.PRIMARY,
         )
 
         self.create_stat_card(
@@ -904,7 +904,8 @@ class FokusApp:
 
         delete_btn = CTkButton(
             master=item,
-            text="×",
+            # God invented ascii so i'll use ascii
+            text="x",
             font=CTkFont(size=16),
             fg_color=self.clrs.DANGER,
             text_color=self.clrs.FG_COLOR,
@@ -918,11 +919,12 @@ class FokusApp:
 
         rename_btn = CTkButton(
             master=item,
-            text="✏",
+            # + >>>> fucking pen emoji
+            text="+",
             font=CTkFont(size=16),
-            fg_color=self.clrs.SUCCESS,
+            fg_color=self.clrs.PRIMARY,
             text_color=self.clrs.FG_COLOR,
-            hover_color=self.clrs.SUCCESS_DARK,
+            hover_color=self.clrs.PRIMARY_DARK,
             width=36,
             height=36,
             corner_radius=18,

@@ -29,13 +29,11 @@ from colors import *  # pyright: ignore[F403]
 from settings_manager import SettingsManager
 from quotes.quotes_handler import QuoteHandler
 from websiteblocker import WebsiteBlocker
-from pygame import mixer
 import random
 
 
 class FokusApp:
     def __init__(self) -> None:
-        mixer.init()
         self.DB = Database()
         self.settings_manager = SettingsManager()
         self.is_finished = False
@@ -615,6 +613,8 @@ class FokusApp:
 
         self.update_navigation("Focus Timer")
 
+        self.play_sound()
+
         for widget in self.header_container.winfo_children():
             widget.destroy()
 
@@ -877,7 +877,6 @@ class FokusApp:
         display_date = (
             session_date if session_date else datetime.now().strftime("%Y-%m-%d %H:%M")
         )
-
         session_name = f"Session #{number}"
         if hasattr(self.DB, "session_names") and (number - 1) < len(
             self.DB.session_names
@@ -893,29 +892,19 @@ class FokusApp:
         )
         session_info.pack(side="left", padx=15, fill="x", expand=True)
 
-        right_container = CTkFrame(master=item, fg_color="transparent", width=300)
-        right_container.pack(side="right", padx=15)
-        right_container.pack_propagate(False)
-
         session_duration = CTkLabel(
-            master=right_container,
+            master=item,
             text=self.format_time(session_time),
             font=CTkFont(family="Helvetica", size=16, weight="bold"),
             text_color=self.clrs.PRIMARY,
+            width=80,
+            anchor="e",
         )
-        session_duration.pack(side="right", padx=(15, 0))
-
-        buttons_container = CTkFrame(
-            master=right_container,
-            fg_color="transparent",
-            width=100,
-        )
-        buttons_container.pack(side="right", padx=(0, 15))
-        buttons_container.pack_propagate(False)
+        session_duration.pack(side="right", padx=(10, 10))
 
         delete_btn = CTkButton(
-            master=buttons_container,
-            text="x",
+            master=item,
+            text="×",
             font=CTkFont(size=16),
             fg_color=self.clrs.DANGER,
             text_color=self.clrs.FG_COLOR,
@@ -925,11 +914,11 @@ class FokusApp:
             corner_radius=18,
             command=lambda: self.show_delete_confirmation(number - 1),
         )
-        delete_btn.pack(side="right", padx=2)
+        delete_btn.pack(side="right", padx=(5, 10))
 
         rename_btn = CTkButton(
-            master=buttons_container,
-            text="+",
+            master=item,
+            text="✏",
             font=CTkFont(size=16),
             fg_color=self.clrs.SUCCESS,
             text_color=self.clrs.FG_COLOR,
@@ -939,7 +928,7 @@ class FokusApp:
             corner_radius=18,
             command=lambda: self.show_rename_dialog(number - 1),
         )
-        rename_btn.pack(side="right", padx=2)
+        rename_btn.pack(side="right", padx=(5, 5))
 
     def set_navigation_state(self, enabled=True):
         """Enable or disable navigation buttons"""
@@ -2046,6 +2035,16 @@ class FokusApp:
             remove_button.pack(side="right", padx=(5, 10))
 
     def play_sound(self):
-        if self.is_finished and not self.countdown_running:
-            mixer.music.load("alarms/ring1.wav")
+        from pygame import mixer
+
+        def _play():
+            mixer.init()
+            mixer.music.load("alarms/ring1.mp3")
             mixer.music.play()
+            mixer.music.set_volume(1)
+            while mixer.music.get_busy():
+                time.sleep(0.1)
+            mixer.quit()
+
+        thread = threading.Thread(target=_play, daemon=True)
+        thread.start()

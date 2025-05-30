@@ -1,5 +1,5 @@
 {
-  "theme": "system",
+  "theme": "light",
   "website_blocking_enabled": false,
   "blocked_sites": [
     "facebook.com",

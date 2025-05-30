@@ -18,7 +18,6 @@ class Database:
             with open(SESSIONS_FILE, "r") as file:
                 self.data = json.load(file)
 
-                # Load focus sessions
                 if "focus_sessions" in self.data:
                     for db in self.data["focus_sessions"]:
                         self.dates.append(db["date"])
@@ -33,11 +32,9 @@ class Database:
         self.dates.append(date)
         self.focus_times.append(focus_time)
 
-        # Add default session name for new session
         session_number = len(self.session_names) + 1
         self.session_names.append(f"Session #{session_number}")
 
-        # Update the data structure
         self.data["focus_sessions"] = [
             {"date": d, "focus_time": t} for d, t in zip(self.dates, self.focus_times)
         ]
@@ -69,7 +66,6 @@ class Database:
         if "session_names" in self.data and self.data["session_names"]:
             self.session_names = self.data["session_names"]
         else:
-            # Initialize with default names
             self.session_names = [
                 f"Session #{i + 1}" for i in range(len(self.focus_times))
             ]

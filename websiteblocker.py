@@ -4,7 +4,7 @@ import subprocess
 import os
 
 
-# fuck off i'll use bare excepts and you shouldn't care
+# i'll use bare excepts and you shouldn't care
 
 
 class WebsiteBlocker:

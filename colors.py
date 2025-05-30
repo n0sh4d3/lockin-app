@@ -1,11 +1,13 @@
 """Colorschemes for fokus app"""
 
+# thanks chat gipity for colorscheme :33
+
 
 class LightTheme:
-    PRIMARY = "#7C4DFF"  # Vivid Purple (bold & rich)
+    PRIMARY = "#7C4DFF"
 
-    PRIMARY_DARK = "#651FFF"  # Deeper indigo-purple
-    PRIMARY_LIGHT = "#B388FF"  # Soft highlight version
+    PRIMARY_DARK = "#651FFF"
+    PRIMARY_LIGHT = "#B388FF"
 
     NEUTRAL_1000 = "#FFFFFF"
     NEUTRAL_900 = "#F5F5F5"
@@ -22,17 +24,17 @@ class LightTheme:
     WARNING = "#FF9800"
     DANGER = "#F44336"
 
-    FG_COLOR = "#1C1C1C"  # Strong dark text
+    FG_COLOR = "#1C1C1C"
     BG_COLOR = NEUTRAL_1000
 
 
 class DarkTheme:
-    PRIMARY = "#7C4DFF"  # Vivid Purple
+    PRIMARY = "#7C4DFF"
 
     PRIMARY_DARK = "#512DA8"
     PRIMARY_LIGHT = "#B388FF"
 
-    NEUTRAL_1000 = "#0D0D0D"  # Ultra dark BG
+    NEUTRAL_1000 = "#0D0D0D"
     NEUTRAL_900 = "#121212"
     NEUTRAL_800 = "#1E1E1E"
     NEUTRAL_700 = "#2A2A2A"
@@ -47,5 +49,5 @@ class DarkTheme:
     WARNING = "#FF9800"
     DANGER = "#EF5350"
 
-    FG_COLOR = "#F5F5F5"  # Clean light text
+    FG_COLOR = "#F5F5F5"
     BG_COLOR = NEUTRAL_1000

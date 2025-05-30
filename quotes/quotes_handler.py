@@ -1,5 +1,5 @@
 import random
-from urllib.parse import quote_from_bytes
+# bozo import
 
 
 # this mf is just to get shit out of main app

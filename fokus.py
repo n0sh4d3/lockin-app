@@ -30,6 +30,7 @@ from settings_manager import SettingsManager
 from quotes.quotes_handler import QuoteHandler
 from websiteblocker import WebsiteBlocker
 import random
+from pygame import mixer
 
 
 class FokusApp:
@@ -309,6 +310,10 @@ class FokusApp:
     def show_setup_view(self):
         """Display the timer setup view"""
         self.current_view = "setup"
+
+        # hack v2
+        self.stop_sound()
+
         self.update_navigation("Fokus Timer")
 
         for widget in self.header_container.winfo_children():
@@ -742,6 +747,9 @@ class FokusApp:
 
     def show_statistics_view(self):
         """Display the statistics view"""
+
+        # hack
+        self.stop_sound()
 
         self.current_view = "statistics"
         self.update_navigation("Statistics")
@@ -2037,8 +2045,6 @@ class FokusApp:
             remove_button.pack(side="right", padx=(5, 10))
 
     def play_sound(self):
-        from pygame import mixer
-
         def _play():
             mixer.init()
             mixer.music.load("alarms/ring1.mp3")
@@ -2050,3 +2056,7 @@ class FokusApp:
 
         thread = threading.Thread(target=_play, daemon=True)
         thread.start()
+
+    def stop_sound(self):
+        mixer.init()
+        mixer.music.stop()

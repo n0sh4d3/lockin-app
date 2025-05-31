@@ -2080,4 +2080,4 @@ class FokusApp:
         """Stop sound regardless of setting"""
         mixer.init()
         mixer.music.stop()
-        mixer.quit()  # Added quit() for cleanup
+        mixer.quit()

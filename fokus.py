@@ -841,11 +841,12 @@ class FokusApp:
             )
             no_data.pack(pady=20)
         else:
+            total_sessions = len(self.DB.dates)
             for i, (session_date, session_time) in enumerate(
-                list(zip(self.DB.dates, self.DB.focus_times)),
+                reversed(list(zip(self.DB.dates, self.DB.focus_times))),
             ):
                 self.create_session_item(
-                    sessions_frame, i + 1, int(session_time), session_date
+                    sessions_frame, total_sessions - i, int(session_time), session_date
                 )
 
     def create_stat_card(self, master, title, value, color):

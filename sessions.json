@@ -39,6 +39,10 @@
     {
       "date": "2025-05-30 19:37:15",
       "focus_time": "60"
+    },
+    {
+      "date": "2025-05-31 21:32:43",
+      "focus_time": "60"
     }
   ],
   "session_names": [
@@ -51,6 +55,7 @@
     "Session #12",
     "Session #14",
     "Session #16",
-    "Session #10"
+    "Session #10",
+    "Session #11"
   ]
 }

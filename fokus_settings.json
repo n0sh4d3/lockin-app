@@ -1,6 +1,6 @@
 {
-  "theme": "light",
-  "website_blocking_enabled": true,
+  "theme": "dark",
+  "website_blocking_enabled": false,
   "blocked_sites": [
     "tiktok.com",
     "www.tiktok.com",

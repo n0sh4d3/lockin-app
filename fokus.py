@@ -58,6 +58,8 @@ class FokusApp:
         self.platform = platform.system().lower()
         self.init_website_blocker()
 
+        self.sound_enabled = True
+
     def start(self):
         """App is running (lezz goo)"""
         self.app = CTk()
@@ -1004,16 +1006,23 @@ class FokusApp:
             text_color=self.clrs.FG_COLOR,
         )
         sound_label.pack(side="left")
+
+        # Create the toggle button with proper functionality
         sound_switch = CTkButton(
             master=sound_frame,
-            text="ON",
+            text="ON" if self.sound_enabled else "OFF",
             font=self.label_font,
-            fg_color=self.clrs.SUCCESS,
-            text_color=self.clrs.FG_COLOR,
-            hover_color=self.clrs.SUCCESS_DARK,
+            fg_color=self.clrs.SUCCESS if self.sound_enabled else self.clrs.NEUTRAL_700,
+            text_color=self.clrs.FG_COLOR
+            if self.sound_enabled
+            else self.clrs.NEUTRAL_300,
+            hover_color=self.clrs.SUCCESS_DARK
+            if self.sound_enabled
+            else self.clrs.NEUTRAL_600,
             width=60,
             height=30,
             corner_radius=15,
+            command=self.toggle_sound_setting,
         )
         sound_switch.pack(side="right")
 
@@ -2044,7 +2053,16 @@ class FokusApp:
             )
             remove_button.pack(side="right", padx=(5, 10))
 
+    def toggle_sound_setting(self):
+        """Toggle the sound setting and refresh the settings view"""
+        self.sound_enabled = not self.sound_enabled
+        self.show_settings_view(True)
+
     def play_sound(self):
+        """Play sound only if sound is enabled"""
+        if not self.sound_enabled:
+            return
+
         def _play():
             mixer.init()
             mixer.music.load("alarms/ring1.mp3")
@@ -2058,5 +2076,7 @@ class FokusApp:
         thread.start()
 
     def stop_sound(self):
+        """Stop sound regardless of setting"""
         mixer.init()
         mixer.music.stop()
+        mixer.quit()  # Added quit() for cleanup

@@ -1,6 +1,6 @@
 # todo
-# block sites when locking in hard
-# gamifying this shit would be fire (but hard tho)
+# gamifying this shit would be fire (but hard tho) not gonna do it
+# fix build process lol
 from customtkinter import (
     CTk,
     CTkButton,

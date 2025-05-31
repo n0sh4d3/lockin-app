@@ -150,3 +150,7 @@ It’s a tool — one built for those ready to take back control. To do the hard
 So go ahead. Block the noise.
 Start the timer.
 And **lock in**.
+
+
+todo:
+fix build process lol

@@ -18,7 +18,7 @@ def get_icon_path():
     """Get the correct icon file based on platform"""
     if platform.system() == "Darwin":  # macOS
         return "icon.icns" if os.path.exists("icon.icns") else None
-    else:  # Windows and Linux
+    else:
         return "icon.ico" if os.path.exists("icon.ico") else None
 
 
@@ -27,7 +27,6 @@ def build_app():
     sep = get_data_separator()
     icon_path = get_icon_path()
 
-    # Base command
     cmd = [
         "pyinstaller",
         "--onefile",
@@ -36,7 +35,6 @@ def build_app():
         "lockin",
     ]
 
-    # Add data files
     data_files = [
         f"fokus_settings.json{sep}.",
         f"sites.json{sep}.",
@@ -52,7 +50,6 @@ def build_app():
         else:
             print(f"Warning: {source} not found, skipping...")
 
-    # Add icon if available
     if icon_path:
         cmd.extend(["--icon", icon_path])
         print(f"Using icon: {icon_path}")
@@ -61,7 +58,6 @@ def build_app():
             "No icon file found (looking for icon.ico on Windows/Linux or icon.icns on macOS)"
         )
 
-    # Add main file
     cmd.append("main.py")
 
     print(f"Building on {platform.system()}...")

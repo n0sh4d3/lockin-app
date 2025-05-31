@@ -35,6 +35,10 @@ def build_app():
         "lockin",
     ]
 
+    if platform.system() == "Windows":
+        cmd.extend(["--uac-admin"])
+        print("Added Windows UAC admin request")
+
     data_files = [
         f"fokus_settings.json{sep}.",
         f"sites.json{sep}.",
@@ -67,7 +71,6 @@ def build_app():
         subprocess.run(cmd, check=True)
         print("\nBuild completed successfully!")
 
-        # Show output location
         if platform.system() == "Windows":
             print("Executable created: dist\\lockin.exe")
         else:

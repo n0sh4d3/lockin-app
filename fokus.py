@@ -1032,27 +1032,6 @@ class FokusApp:
         self.create_theme_section(appearance_tab)
 
         self.create_settings_section(notifications_tab, "Notification Settings")
-        notifications_frame = CTkFrame(master=notifications_tab, fg_color="transparent")
-        notifications_frame.pack(fill="x", pady=5)
-        notifications_label = CTkLabel(
-            master=notifications_frame,
-            text="Enable desktop notifications",
-            font=self.label_font,
-            text_color=self.clrs.FG_COLOR,
-        )
-        notifications_label.pack(side="left")
-        notifications_switch = CTkButton(
-            master=notifications_frame,
-            text="ON",
-            font=self.label_font,
-            fg_color=self.clrs.SUCCESS,
-            text_color=self.clrs.FG_COLOR,
-            hover_color=self.clrs.SUCCESS_DARK,
-            width=60,
-            height=30,
-            corner_radius=15,
-        )
-        notifications_switch.pack(side="right")
 
         reminder_frame = CTkFrame(master=notifications_tab, fg_color="transparent")
         reminder_frame.pack(fill="x", pady=5)
@@ -1065,7 +1044,7 @@ class FokusApp:
         reminder_label.pack(side="left")
         reminder_switch = CTkButton(
             master=reminder_frame,
-            text="OFF",
+            text="i'm pussy",
             font=self.label_font,
             fg_color=self.clrs.NEUTRAL_700,
             text_color=self.clrs.NEUTRAL_300,
@@ -1080,7 +1059,8 @@ class FokusApp:
         version_frame.pack(side="bottom", fill="x", padx=30, pady=20)
         version_label = CTkLabel(
             master=version_frame,
-            text="Focus v0.0.1",
+            # this just looks cool
+            text="Focus v0.5.1",
             font=self.tooltip_font,
             text_color=self.clrs.NEUTRAL_400,
         )
